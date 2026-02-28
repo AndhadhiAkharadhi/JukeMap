@@ -3,1909 +3,596 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>NABE | Location-Based Intelligence</title>
+    <title>NABE | Location Intelligence</title>
     
-    <!-- Leaflet von jsdelivr (zuverlässiger als unpkg) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- PWA Manifest inline -->
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiTkFCRSIsInNob3J0X25hbWUiOiJOQUJFIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwidGhlbWVfY29sb3IiOiIjMGEwYTBhIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwYTBhMGEiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCw8c3ZnIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9Ijk2IiBmaWxsPSIjMGEwYTBhIi8+PGNpcmNsZSBjeD0iOTYiIGN5PSI5NiIgcj0iODAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHRleHQgeD0iOTYiIHk9IjEwNCIgZm9udC1mYW1pbHk9IkNvdXJpZXIsIG1vbm9zcGFjZSIgZm9udC1zaXplPSI0OCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+TkFCRTwvdGV4dD48L3N2Zz4iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0=">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <!-- Fallback wenn CDN blockiert ist -->
-    <script>
-        window.leafletLoaded = false;
-        window.onload = function() {
-            if (typeof L !== 'undefined') {
-                window.leafletLoaded = true;
-            } else {
-                console.error('Leaflet konnte nicht geladen werden');
-                document.body.innerHTML = '<div style="padding: 20px; color: white; text-align: center; background: #0a0a0a; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif;"><h2>Fehler beim Laden der Karte</h2><p>Bitte überprüfen Sie Ihre Internetverbindung oder laden Sie die Seite neu.</p><button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #00d4ff; border: none; border-radius: 20px; cursor: pointer; font-weight: bold;">Neu laden</button></div>';
-            }
-        };
-    </script>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <!-- Externe Libraries -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     
     <style>
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: rgba(15, 15, 15, 0.98);
-            --accent-cyan: #00d4ff;
-            --accent-cyan-dark: #00a8cc;
-            --accent-blue: #0ea5e9;
-            --text-primary: #ffffff;
-            --text-secondary: #888888;
-            --glass-bg: rgba(20, 20, 20, 0.8);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --danger: #ef4444;
-            --success: #10b981;
-            --music-accent: #8b5cf6;
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root { --bg: #0a0a0a; --panel: #141414; --accent: #ffffff; --text: #e0e0e0; --text-sec: #666; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; overflow: hidden; position: fixed; width: 100%; height: 100%; }
         
-        html, body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-            position: fixed;
-        }
-
-        /* Location Gate */
-        #locationGate {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s;
-        }
-        #locationGate.hidden { opacity: 0; pointer-events: none; }
+        /* Map */
+        #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; filter: invert(1) hue-rotate(180deg) contrast(1.1); }
+        .leaflet-control-attribution { display: none; }
         
-        .gate-content { text-align: center; padding: 20px; max-width: 90%; }
-        .gate-logo { 
-            font-size: 48px; 
-            font-weight: 300; 
-            letter-spacing: 8px; 
-            color: var(--text-primary); 
-            margin-bottom: 8px; 
-            font-family: 'Courier New', monospace;
-            text-transform: uppercase;
-        }
-        .gate-subtitle { 
-            color: var(--accent-cyan); 
-            font-size: 12px; 
-            letter-spacing: 4px; 
-            text-transform: uppercase; 
-            margin-bottom: 48px; 
-            font-weight: 500;
-        }
-        .gate-btn { 
-            background: var(--accent-cyan); 
-            border: none;
-            color: #000; 
-            padding: 16px 48px; 
-            font-size: 14px; 
-            letter-spacing: 2px; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-            text-transform: uppercase;
-            font-weight: 600;
-            border-radius: 24px;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-            margin: 8px;
-        }
-        .gate-btn:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
-        }
-        .gate-btn.secondary {
-            background: transparent;
-            color: var(--text-primary);
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: none;
-        }
-        .gate-btn.secondary:hover {
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
-        .gate-error { 
-            color: var(--danger); 
-            margin-top: 20px; 
-            font-size: 14px; 
-            display: none; 
-            font-family: 'Courier New', monospace;
-            max-width: 300px;
-            text-align: center;
-            line-height: 1.5;
-        }
-
-        /* Main App */
-        #mainApp { width: 100%; height: 100%; opacity: 0; transition: opacity 0.5s; display: none; position: relative; }
-        #mainApp.active { opacity: 1; display: block; }
-        
-        #map { 
-            width: 100%; 
-            height: 100%; 
-            z-index: 1; 
-            background: #0a0a0a;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        /* Matrix Theme für Karte */
-        .leaflet-layer {
-            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-        }
-        .leaflet-container {
-            background: #0a0a0a !important;
-        }
-        
-        /* Wichtig: Leaflet muss sichtbar sein */
-        .leaflet-pane,
-        .leaflet-map-pane,
-        .leaflet-tile-pane {
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Hidden YouTube Player */
-        #youtubePlayer {
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* Position Indicator */
-        #posIndicator {
-            position: fixed; 
-            top: 80px; 
-            left: 20px; 
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.8); 
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px; 
-            letter-spacing: 0.5px; 
-            color: var(--text-primary);
-            opacity: 0; 
-            transform: translateY(-20px); 
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-        #posIndicator.visible { opacity: 1; transform: translateY(0); }
-        
-        .pos-dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #10b981;
-            animation: pulse 2s infinite;
-        }
-        .pos-text { color: var(--text-primary); }
-
-        /* Cyan FAB Button */
-        #fabContainer { 
-            position: fixed; 
-            bottom: 30px; 
-            right: 30px; 
-            z-index: 1000; 
-            opacity: 0; 
-            transform: scale(0.8); 
-            transition: all 0.3s; 
-        }
-        #fabContainer.visible { opacity: 1; transform: scale(1); }
-
-        .fab-main {
-            width: 56px; 
-            height: 56px; 
-            border-radius: 50%;
-            background: var(--accent-cyan); 
-            border: none; 
-            color: #000; 
-            font-size: 28px; 
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
-            transition: all 0.3s; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            font-weight: 300;
-        }
-        .fab-main.active { 
-            transform: rotate(45deg); 
-            background: var(--danger);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-        }
-
-        .fab-menu {
-            position: absolute; 
-            bottom: 70px; 
-            right: 0;
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px;
-            opacity: 0; 
-            pointer-events: none; 
-            transform: translateY(20px);
-            transition: all 0.3s;
-        }
-        .fab-menu.active { opacity: 1; pointer-events: all; transform: translateY(0); }
-
-        .fab-item { display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
-        .fab-label {
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 6px 12px; 
-            border-radius: 6px; 
-            font-size: 12px;
-            color: var(--text-primary); 
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            white-space: nowrap; 
-            opacity: 0; 
-            transform: translateX(10px); 
-            transition: all 0.2s;
-        }
-        .fab-menu.active .fab-label { opacity: 1; transform: translateX(0); }
-        
-        .fab-btn {
-            width: 44px; 
-            height: 44px; 
-            border-radius: 50%; 
-            background: rgba(30, 30, 30, 0.9);
-            backdrop-filter: blur(10px); 
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--text-primary); 
-            cursor: pointer; 
-            display: flex;
-            align-items: center; 
-            justify-content: center; 
-            transition: all 0.3s; 
-            font-size: 18px;
-        }
-        .fab-btn:hover { 
-            background: var(--accent-cyan); 
-            color: #000; 
-            transform: scale(1.1);
-            border-color: var(--accent-cyan);
-        }
-        .fab-btn.music-btn { 
-            border-color: var(--music-accent); 
-            color: var(--music-accent); 
-        }
-        .fab-btn.music-btn:hover { 
-            background: var(--music-accent); 
-            color: white; 
-        }
-        .fab-btn.music-btn.active { 
-            background: var(--music-accent); 
-            color: white; 
-            animation: pulse 2s infinite; 
-        }
-
-        /* Side Panels */
-        .side-panel {
-            position: fixed; 
-            right: -100%; 
-            top: 0;
-            width: 100%; 
-            max-width: 400px; 
-            height: 100%;
-            background: var(--bg-secondary);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-left: 1px solid rgba(255, 255, 255, 0.05);
-            z-index: 900; 
-            transition: right 0.3s;
-            display: flex; 
-            flex-direction: column;
-        }
-        .side-panel.open { right: 0; }
-
-        .panel-header {
-            padding: 16px 20px; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            background: rgba(0, 0, 0, 0.3);
-            flex-shrink: 0;
-        }
-        .panel-title { 
-            font-size: 16px; 
-            letter-spacing: 2px; 
-            text-transform: uppercase; 
-            font-weight: 600;
-            font-family: 'Courier New', monospace;
-        }
-        .panel-title.music { color: var(--music-accent); }
-        .panel-title.chat { color: var(--accent-cyan); }
-        
-        .panel-close { 
-            background: none; 
-            border: none; 
-            color: var(--text-secondary); 
-            font-size: 24px; 
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.2s;
-        }
-        .panel-close:hover { 
-            background: rgba(255,255,255,0.1); 
-            color: var(--text-primary);
-        }
-
-        /* Mini Player */
-        #miniPlayer {
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-left: 3px solid var(--music-accent);
-            border-radius: 12px;
-            padding: 12px;
-            z-index: 500;
-            display: none;
-            align-items: center;
-            gap: 12px;
-            width: 260px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        #miniPlayer.active { display: flex; animation: slideIn 0.3s; }
-        #miniPlayer:hover { 
-            transform: translateY(-2px); 
-            border-color: var(--accent-cyan);
-            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.1);
-        }
-        
-        .mini-visualizer { 
-            display: flex; 
-            align-items: end; 
-            gap: 2px; 
-            height: 24px; 
-            width: 24px; 
-        }
-        .mini-bar { 
-            width: 4px; 
-            background: var(--accent-cyan); 
-            border-radius: 2px; 
-            animation: sound 0ms infinite alternate; 
-        }
-        .mini-bar:nth-child(1) { animation-duration: 474ms; height: 30%; }
-        .mini-bar:nth-child(2) { animation-duration: 433ms; height: 80%; }
-        .mini-bar:nth-child(3) { animation-duration: 407ms; height: 50%; }
-        .mini-bar:nth-child(4) { animation-duration: 458ms; height: 70%; }
-        #miniPlayer:not(.playing) .mini-bar { animation-play-state: paused; height: 20% !important; }
-        
-        @keyframes sound { 0% { height: 20%; } 100% { height: 100%; } }
-        
-        .mini-info { flex: 1; min-width: 0; }
-        .mini-title { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
-        .mini-artist { font-size: 11px; color: var(--text-secondary); }
-        .mini-controls { display: flex; gap: 4px; }
-        .mini-btn { 
-            background: none; 
-            border: none; 
-            color: var(--text-primary); 
-            cursor: pointer; 
-            font-size: 14px; 
-            padding: 6px; 
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        .mini-btn:hover { background: rgba(255,255,255,0.1); color: var(--accent-cyan); }
-
-        /* Music Panel */
-        .now-playing {
-            padding: 32px 20px;
-            text-align: center;
-            background: linear-gradient(180deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            flex-shrink: 0;
-        }
-
-        .album-art {
-            width: 180px;
-            height: 180px;
-            margin: 0 auto 24px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #222 0%, #111 100%);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .album-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        
-        .vinyl-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
-            background: radial-gradient(circle, #000 30%, #333 31%, #000 32%, #333 33%, #000 40%, transparent 70%);
-            border-radius: 50%;
-            opacity: 0.8;
-            animation: spin 3s linear infinite;
-            animation-play-state: paused;
-        }
-        .now-playing.playing .vinyl-overlay { animation-play-state: running; }
-        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-
-        .track-info h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: var(--text-primary);
-        }
-        .track-info p { color: var(--text-secondary); font-size: 13px; }
-
-        .visualizer-container {
-            height: 50px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            gap: 3px;
-            margin: 20px 0;
-            padding: 0 40px;
-        }
-        .viz-bar {
-            width: 4px;
-            background: linear-gradient(to top, var(--music-accent), var(--accent-cyan));
-            border-radius: 2px;
-            transition: height 0.1s ease;
-            height: 4px;
-        }
-
-        .progress-container { padding: 0 20px 16px; flex-shrink: 0; }
-        .progress-bar {
-            width: 100%;
-            height: 3px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 2px;
-            cursor: pointer;
-            position: relative;
-            margin-bottom: 8px;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--accent-cyan);
-            width: 0%;
-            border-radius: 2px;
-            transition: width 0.1s;
-            position: relative;
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-        }
-        .time-display {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: var(--text-secondary);
-            font-family: 'Courier New', monospace;
-        }
-
-        .player-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 24px;
-            padding: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            flex-shrink: 0;
-        }
-        .control-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-        .control-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
-        .control-btn.play { 
-            width: 56px; height: 56px; 
-            background: var(--text-primary); 
-            color: #000; 
-            font-size: 20px;
-        }
-        .control-btn.play:hover { transform: scale(1.05); background: var(--accent-cyan); }
-
-        /* Queue */
-        .queue-container { flex: 1; overflow-y: auto; padding: 16px; min-height: 0; }
-        .queue-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            font-size: 11px;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            letter-spacing: 1px;
-            font-family: 'Courier New', monospace;
-            flex-shrink: 0;
-        }
-        .queue-list { display: flex; flex-direction: column; gap: 8px; }
-        
-        .queue-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-        .queue-item:hover { background: rgba(255,255,255,0.05); }
-        .queue-item.active { 
-            border-color: var(--accent-cyan); 
-            background: rgba(0, 212, 255, 0.1);
-        }
-        .queue-number { 
-            width: 20px; 
-            text-align: center; 
-            color: var(--text-secondary); 
-            font-size: 11px;
-            font-family: 'Courier New', monospace;
-            flex-shrink: 0;
-        }
-        .queue-thumb { width: 36px; height: 36px; border-radius: 4px; background: #333; object-fit: cover; flex-shrink: 0; }
-        .queue-info { flex: 1; min-width: 0; text-align: left; overflow: hidden; }
-        .queue-title { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
-        .queue-artist { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .queue-remove {
-            background: none; border: none; color: var(--text-secondary);
-            cursor: pointer; padding: 8px; opacity: 0; transition: opacity 0.2s;
-            font-size: 16px; flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-        }
-        .queue-item:hover .queue-remove { opacity: 1; }
-        .queue-remove:hover { color: var(--danger); }
-
-        /* Chat */
-        #chatMessages {
-            flex: 1; overflow-y: auto; padding: 16px;
-            display: flex; flex-direction: column; gap: 10px;
-            min-height: 0;
-        }
-        .message {
-            max-width: 80%; padding: 10px 14px; border-radius: 12px;
-            position: relative; animation: slideIn 0.3s;
-            font-size: 14px;
-            line-height: 1.4;
-            word-break: break-word;
-        }
-        .message.own { 
-            align-self: flex-end; 
-            background: var(--accent-cyan); 
-            color: #000;
-            border-bottom-right-radius: 4px;
-        }
-        .message.other { 
-            align-self: flex-start; 
-            background: rgba(255,255,255,0.1); 
-            border: 1px solid rgba(255,255,255,0.05);
-            border-bottom-left-radius: 4px;
-        }
-        .message.system { 
-            align-self: center; 
-            background: rgba(0,0,0,0.5); 
-            border: 1px solid rgba(255,255,255,0.1); 
-            font-size: 12px; 
-            color: var(--text-secondary); 
-            max-width: 90%; 
-            text-align: center;
-            padding: 6px 12px;
-            border-radius: 12px;
-        }
-        .message-meta { font-size: 10px; margin-top: 4px; opacity: 0.7; }
-
-        .chat-input-area, .music-input-area {
-            padding: 12px 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex; gap: 8px;
-            background: rgba(0, 0, 0, 0.3);
-            flex-shrink: 0;
-        }
-
-        .input-wrapper { position: relative; flex: 1; display: flex; align-items: center; }
-        .panel-input {
-            width: 100%; 
-            background: rgba(255,255,255,0.05); 
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-primary); 
-            padding: 10px 36px 10px 14px; 
-            border-radius: 20px;
-            outline: none; 
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        .panel-input:focus { 
-            border-color: var(--accent-cyan); 
-            background: rgba(255,255,255,0.08);
-        }
-        .voice-btn {
-            position: absolute; 
-            right: 6px; 
-            background: none; 
-            border: none;
-            color: var(--accent-cyan); 
-            cursor: pointer; 
-            padding: 6px; 
-            border-radius: 50%;
-            font-size: 14px;
-            transition: all 0.2s;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .voice-btn:hover { background: rgba(0, 212, 255, 0.1); }
-        .voice-btn.recording { animation: pulse 1s infinite; color: var(--danger); }
-        
-        .send-btn {
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            background: var(--accent-cyan);
-            border: none; 
-            color: #000; 
-            cursor: pointer; 
-            display: flex;
-            align-items: center; 
-            justify-content: center;
-            font-size: 16px;
-            transition: transform 0.2s;
-            flex-shrink: 0;
-        }
-        .send-btn:hover { transform: scale(1.1); }
-
-        /* Overlays */
-        .overlay-panel {
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%;
-            background: rgba(0,0,0,0.9); 
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 2000; 
-            display: none; 
-            justify-content: center; 
-            align-items: center;
-            padding: 20px;
-        }
+        /* Overlays/Panels */
+        .overlay-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,10,0.98); z-index: 1000; display: none; flex-direction: column; padding: 20px; padding-top: 60px; overflow-y: auto; }
         .overlay-panel.active { display: flex; }
-        .overlay-content {
-            background: var(--bg-secondary); 
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px; 
-            padding: 24px; 
-            max-width: 400px; 
-            width: 100%;
-            max-height: 80vh; 
-            overflow-y: auto;
-        }
-        .overlay-close { 
-            float: right; 
-            background: none; 
-            border: none; 
-            color: var(--text-secondary); 
-            font-size: 24px; 
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            margin: -8px -8px 0 0;
-        }
-        .overlay-close:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+        .overlay-close { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; background: none; border: 1px solid var(--text-sec); color: var(--text); font-size: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .overlay-title { font-size: 24px; font-weight: 300; letter-spacing: 4px; margin-bottom: 30px; text-align: center; border-bottom: 1px solid var(--panel); padding-bottom: 20px; }
         
-        .overlay-title { 
-            font-size: 18px; 
-            color: var(--accent-cyan); 
-            margin-bottom: 20px; 
-            letter-spacing: 2px; 
-            text-transform: uppercase;
-            font-family: 'Courier New', monospace;
-            font-weight: 600;
-        }
-
-        /* Timer */
-        .timer-display { 
-            font-size: 56px; 
-            font-family: 'Courier New', monospace; 
-            text-align: center; 
-            color: var(--accent-cyan); 
-            margin: 24px 0; 
-            letter-spacing: 4px;
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-        }
-        .timer-inputs { display: flex; gap: 16px; justify-content: center; margin-bottom: 24px; }
-        .time-field { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .time-field label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-        .time-field input { 
-            width: 70px; 
-            background: rgba(255,255,255,0.05); 
-            border: 1px solid rgba(255,255,255,0.1); 
-            color: var(--text-primary); 
-            padding: 12px; 
-            text-align: center; 
-            font-size: 24px; 
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-        }
-        .timer-controls { display: flex; gap: 12px; justify-content: center; }
-        .btn-primary { 
-            background: var(--accent-cyan); 
-            color: #000; 
-            border: none; 
-            padding: 12px 32px; 
-            border-radius: 24px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 13px;
-            transition: all 0.2s;
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
-        .btn-secondary { 
-            background: transparent; 
-            color: var(--text-secondary); 
-            border: 1px solid rgba(255,255,255,0.2); 
-            padding: 12px 32px; 
-            border-radius: 24px; 
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s;
-        }
-        .btn-secondary:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
-
-        /* Status */
-        .status-options { display: grid; gap: 8px; }
-        .status-option {
-            background: rgba(255,255,255,0.03); 
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 14px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            transition: all 0.2s;
-            display: flex; 
-            align-items: center; 
-            gap: 12px;
-            font-size: 14px;
-            color: var(--text-primary);
-        }
-        .status-option:hover { 
-            border-color: var(--accent-cyan); 
-            background: rgba(0, 212, 255, 0.1);
-        }
-
-        /* Speech Visualizer */
-        #speechVisualizer {
-            position: fixed; 
-            bottom: 100px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9); 
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 16px 32px; 
-            border-radius: 30px; 
-            border: 1px solid var(--accent-cyan);
-            display: none; 
-            align-items: center; 
-            gap: 16px; 
-            z-index: 3000;
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
-        }
-        #speechVisualizer.active { display: flex; }
-        .speech-waves { display: flex; gap: 3px; align-items: center; height: 24px; }
-        .wave-bar { 
-            width: 3px; 
-            background: var(--accent-cyan); 
-            border-radius: 2px; 
-            animation: wave 0.5s ease-in-out infinite; 
-            box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
-        }
-        .wave-bar:nth-child(2) { animation-delay: 0.1s; height: 16px; }
-        .wave-bar:nth-child(3) { animation-delay: 0.2s; height: 24px; }
-        .wave-bar:nth-child(4) { animation-delay: 0.3s; height: 12px; }
-        .wave-bar:nth-child(5) { animation-delay: 0.4s; height: 20px; }
-        @keyframes wave { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
-
+        /* Chat */
+        #chatMessages { flex: 1; overflow-y: auto; margin-bottom: 20px; padding: 10px; background: var(--panel); border-radius: 12px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .msg.own { align-self: flex-end; background: var(--accent); color: var(--bg); border-bottom-right-radius: 4px; }
+        .msg.other { align-self: flex-start; background: #222; color: var(--text); border-bottom-left-radius: 4px; }
+        .msg.system { align-self: center; background: transparent; color: var(--text-sec); font-size: 12px; font-style: italic; max-width: 90%; text-align: center; }
+        .msg .location-tag { display: block; margin-top: 4px; font-size: 11px; opacity: 0.8; text-decoration: underline; cursor: pointer; }
+        .chat-input-area { display: flex; gap: 10px; margin-bottom: 10px; }
+        .panel-input { flex: 1; background: var(--panel); border: 1px solid #333; color: var(--text); padding: 12px 16px; border-radius: 25px; font-size: 15px; outline: none; }
+        .send-btn { width: 50px; height: 50px; border-radius: 50%; background: var(--accent); color: var(--bg); border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .action-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; }
+        .action-btn { padding: 8px 16px; background: transparent; border: 1px solid var(--text-sec); color: var(--text-sec); border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.3s; }
+        .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+        
+        /* Quiz */
+        .quiz-question { padding: 20px; text-align: center; font-size: 18px; font-weight: 300; line-height: 1.5; margin-bottom: 20px; background: var(--panel); border-radius: 12px; }
+        .quiz-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
+        .quiz-option { padding: 18px; background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; font-size: 15px; }
+        .quiz-option:hover { background: rgba(255,255,255,0.08); border-color: #555; }
+        .quiz-option.correct { background: #1a4d1a !important; border-color: #2d8a2d; color: #fff; }
+        .quiz-option.wrong { background: #4d1a1a !important; border-color: #8a2d2d; color: #fff; }
+        .quiz-option.disabled { pointer-events: none; opacity: 0.6; }
+        .quiz-stats { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 20px; font-size: 14px; }
+        .leaderboard { background: var(--panel); border-radius: 12px; padding: 15px; }
+        .lb-title { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-sec); margin-bottom: 15px; text-align: center; }
+        .lb-entry { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 14px; }
+        .lb-entry:last-child { border-bottom: none; }
+        .lb-entry.top { color: var(--accent); font-weight: 600; }
+        
+        /* Search/Music */
+        #searchResults { max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .search-result { display: flex; align-items: center; gap: 15px; padding: 12px; background: var(--panel); border-radius: 10px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+        .search-result:hover { border-color: var(--text-sec); }
+        .search-thumb { width: 60px; height: 45px; background: #222; border-radius: 6px; object-fit: cover; }
+        .search-info { flex: 1; }
+        .search-title { font-size: 14px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .search-meta { font-size: 12px; color: var(--text-sec); }
+        .search-type { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 4px 8px; background: #222; border-radius: 4px; color: var(--text-sec); }
+        
+        /* Mini Player */
+        #miniPlayer { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(200%); width: 90%; max-width: 400px; background: rgba(20,20,20,0.95); backdrop-filter: blur(20px); border: 1px solid #333; border-radius: 16px; padding: 15px; z-index: 500; transition: transform 0.3s ease; }
+        #miniPlayer.active { transform: translateX(-50%) translateY(0); }
+        .player-track { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .player-art { width: 40px; height: 40px; background: #333; border-radius: 6px; }
+        .player-info { flex: 1; overflow: hidden; }
+        .player-title { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .player-artist { font-size: 11px; color: var(--text-sec); }
+        .player-controls { display: flex; justify-content: center; gap: 20px; }
+        .p-btn { background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; }
+        .progress-bar { width: 100%; height: 2px; background: #333; margin-top: 10px; border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 1s linear; }
+        
+        /* FAB Menu */
+        #fabContainer { position: fixed; bottom: 30px; right: 30px; z-index: 100; }
+        #fabMain { width: 60px; height: 60px; border-radius: 50%; background: var(--accent); color: var(--bg); border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; transition: transform 0.3s; }
+        #fabMain.active { transform: rotate(45deg); }
+        .fab-menu { position: absolute; bottom: 70px; right: 0; display: flex; flex-direction: column; gap: 15px; opacity: 0; pointer-events: none; transition: all 0.3s; transform: translateY(20px); }
+        .fab-menu.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+        .fab-item { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
+        .fab-label { background: var(--panel); padding: 8px 16px; border-radius: 20px; font-size: 12px; color: var(--text); border: 1px solid #333; white-space: nowrap; }
+        .fab-btn { width: 50px; height: 50px; border-radius: 50%; background: var(--panel); border: 1px solid #444; color: var(--text); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .fab-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+        
+        /* Location Gate */
+        #locationGate { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+        .gate-logo { font-size: 48px; letter-spacing: 8px; margin-bottom: 20px; font-weight: 300; }
+        .gate-text { color: var(--text-sec); margin-bottom: 40px; line-height: 1.6; max-width: 300px; }
+        .gate-btn { padding: 16px 48px; background: var(--accent); color: var(--bg); border: none; border-radius: 30px; font-size: 16px; cursor: pointer; letter-spacing: 2px; transition: all 0.3s; }
+        .gate-btn:hover { transform: scale(1.05); }
+        
         /* Toast */
-        #toast {
-            position: fixed; 
-            bottom: 100px; 
-            left: 50%; 
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(0, 0, 0, 0.9); 
-            backdrop-filter: blur(10px); 
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--accent-cyan);
-            color: var(--accent-cyan); 
-            padding: 12px 24px; 
-            border-radius: 8px; 
-            z-index: 5000;
-            opacity: 0; 
-            transition: all 0.3s; 
-            pointer-events: none;
-            font-size: 13px;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
-            text-align: center;
-            max-width: 90%;
-        }
+        #toast { position: fixed; bottom: 150px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(255,255,255,0.95); color: var(--bg); padding: 12px 24px; border-radius: 30px; font-size: 14px; z-index: 3000; opacity: 0; transition: all 0.3s; pointer-events: none; font-weight: 500; }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-        /* User Marker */
-        .user-marker-pin {
-            width: 20px;
-            height: 20px;
-            background: var(--accent-cyan);
-            border-radius: 50%;
-            border: 3px solid #fff;
-            box-shadow: 0 0 0 8px rgba(0, 212, 255, 0.3), 0 0 20px rgba(0, 212, 255, 0.6);
-            animation: pulse-ring 2s infinite;
-        }
-        @keyframes pulse-ring {
-            0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4), 0 0 20px rgba(0, 212, 255, 0.6); }
-            70% { box-shadow: 0 0 0 15px rgba(0, 212, 255, 0), 0 0 30px rgba(0, 212, 255, 0.2); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0), 0 0 20px rgba(0, 212, 255, 0.6); }
-        }
-
-        /* Compass Button */
-        .compass-btn {
-            position: fixed;
-            bottom: 30px;
-            left: 20px;
-            width: 48px;
-            height: 48px;
-            background: var(--accent-cyan);
-            border: none;
-            border-radius: 50%;
-            color: #000;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
-            opacity: 0;
-            transform: scale(0.8);
-            transition: all 0.3s;
-        }
-        .compass-btn.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-        .compass-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
-        }
-
-        /* Marker auf Karte */
-        .custom-marker {
-            background: var(--accent-cyan);
-            border: 2px solid white;
-            border-radius: 50%;
-            width: 12px;
-            height: 12px;
-            box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.4), 0 0 10px rgba(0, 212, 255, 0.8);
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-
-        /* Mobile Anpassungen */
-        @media (max-width: 768px) {
-            .gate-logo { font-size: 36px; letter-spacing: 6px; }
-            .side-panel { max-width: 100%; }
-            #miniPlayer { width: calc(100% - 40px); left: 20px; right: 20px; bottom: 100px; }
-            .album-art { width: 140px; height: 140px; }
-            .timer-display { font-size: 42px; }
-            #fabContainer { bottom: 20px; right: 20px; }
-            .compass-btn { bottom: 20px; left: 20px; }
-            .timer-inputs { gap: 8px; }
-            .time-field input { width: 60px; font-size: 20px; }
-        }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-        ::-webkit-scrollbar-thumb { background: var(--accent-cyan); border-radius: 3px; }
         
-        /* Map Loading Error State */
-        .map-error {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: var(--text-secondary);
-            z-index: 2;
+        /* Voice Animation */
+        .voice-indicator { display: none; position: fixed; bottom: 200px; left: 50%; transform: translateX(-50%); z-index: 2500; }
+        .voice-indicator.active { display: block; }
+        .voice-wave { display: flex; gap: 4px; align-items: center; height: 40px; }
+        .wave-bar { width: 4px; background: var(--accent); border-radius: 2px; animation: wave 1s ease-in-out infinite; }
+        .wave-bar:nth-child(1) { height: 20%; animation-delay: 0s; }
+        .wave-bar:nth-child(2) { height: 60%; animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { height: 40%; animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { height: 80%; animation-delay: 0.3s; }
+        .wave-bar:nth-child(5) { height: 30%; animation-delay: 0.4s; }
+        @keyframes wave { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+        
+        @media (max-width: 480px) {
+            .overlay-panel { padding: 15px; padding-top: 50px; }
+            .overlay-title { font-size: 20px; margin-bottom: 20px; }
+            #fabContainer { bottom: 20px; right: 20px; }
+            #miniPlayer { width: 95%; bottom: 90px; }
         }
     </style>
 </head>
 <body>
+
     <!-- Location Gate -->
     <div id="locationGate">
-        <div class="gate-content">
-            <div class="gate-logo">NABE</div>
-            <div class="gate-subtitle">Location-Based Intelligence</div>
-            <button class="gate-btn" onclick="requestLocation()">Standort aktivieren</button>
-            <button class="gate-btn secondary" onclick="skipLocation()">Ohne Standort fortfahren</button>
-            <div id="gateError" class="gate-error"></div>
+        <div class="gate-logo">NABE</div>
+        <div class="gate-text">Standortfreigabe erforderlich für lokale Intelligenz<br><br>Dein Standort bleibt anonym. Keine Speicherung auf Servern.</div>
+        <button class="gate-btn" onclick="requestLocation()">STANDORT FREIGEBEN</button>
+    </div>
+
+    <!-- Map -->
+    <div id="map"></div>
+
+    <!-- Voice Indicator -->
+    <div class="voice-indicator" id="voiceIndicator">
+        <div class="voice-wave">
+            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
         </div>
     </div>
 
-    <!-- Main App -->
-    <div id="mainApp">
-        <div id="map">
-            <div id="mapLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--accent-cyan); font-family: monospace; z-index: 0;">
-                Lade Karte...
+    <!-- Mini Player -->
+    <div id="miniPlayer">
+        <div class="player-track">
+            <img class="player-art" id="playerArt" src="">
+            <div class="player-info">
+                <div class="player-title" id="playerTitle">Kein Track</div>
+                <div class="player-artist" id="playerArtist">Warte auf Auswahl...</div>
             </div>
         </div>
-        
-        <!-- Position Indicator -->
-        <div id="posIndicator">
-            <div class="pos-dot"></div>
-            <span class="pos-text" id="posText">--.----, --.----</span>
+        <div class="player-controls">
+            <button class="p-btn" onclick="playerPrev()">⏮</button>
+            <button class="p-btn" onclick="playerToggle()" id="playPauseBtn">▶</button>
+            <button class="p-btn" onclick="playerNext()">⏭</button>
         </div>
-
-        <!-- Compass Button -->
-        <button class="compass-btn" id="compassBtn" onclick="recenterMap()">🧭</button>
-
-        <!-- Hidden YouTube Player -->
-        <div id="youtubePlayer"></div>
-
-        <!-- Mini Player -->
-        <div id="miniPlayer" onclick="toggleMusic()">
-            <div class="mini-visualizer">
-                <div class="mini-bar"></div>
-                <div class="mini-bar"></div>
-                <div class="mini-bar"></div>
-                <div class="mini-bar"></div>
-            </div>
-            <div class="mini-info">
-                <div class="mini-title">Kein Titel</div>
-                <div class="mini-artist">Warteschlange leer</div>
-            </div>
-            <div class="mini-controls" onclick="event.stopPropagation()">
-                <button class="mini-btn" onclick="togglePlay()">▶</button>
-            </div>
-        </div>
-
-        <!-- FAB -->
-        <div id="fabContainer">
-            <button class="fab-main" id="fabMain" onclick="toggleFab()">+</button>
-            <div class="fab-menu" id="fabMenu">
-                <div class="fab-item">
-                    <span class="fab-label">Quiz</span>
-                    <button class="fab-btn" onclick="toggleQuiz()">?</button>
-                </div>
-                <div class="fab-item">
-                    <span class="fab-label">Status</span>
-                    <button class="fab-btn" onclick="toggleStatus()">●</button>
-                </div>
-                <div class="fab-item">
-                    <span class="fab-label">Suche</span>
-                    <button class="fab-btn" onclick="toggleSearch()">⌕</button>
-                </div>
-                <div class="fab-item">
-                    <span class="fab-label">Timer</span>
-                    <button class="fab-btn" onclick="toggleTimer()">◷</button>
-                </div>
-                <div class="fab-item">
-                    <span class="fab-label">Chat</span>
-                    <button class="fab-btn" onclick="toggleChat()">✉</button>
-                </div>
-                <div class="fab-item">
-                    <span class="fab-label">Musik</span>
-                    <button class="fab-btn music-btn" id="musicFabBtn" onclick="toggleMusic()">♫</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Music Panel -->
-        <div id="musicPanel" class="side-panel">
-            <div class="panel-header">
-                <span class="panel-title music">♫ JUKEBOX</span>
-                <button class="panel-close" onclick="toggleMusic()">×</button>
-            </div>
-            
-            <div class="now-playing" id="nowPlaying">
-                <div class="album-art">
-                    <img id="albumArt" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ccircle cx='100' cy='100' r='30' fill='%23333'/%3E%3C/svg%3E" alt="Album Art">
-                    <div class="vinyl-overlay"></div>
-                </div>
-                
-                <div class="track-info">
-                    <h3 id="trackTitle">Kein Titel</h3>
-                    <p id="trackArtist">Warteschlange ist leer</p>
-                </div>
-
-                <div class="visualizer-container" id="visualizer"></div>
-            </div>
-
-            <div class="progress-container">
-                <div class="progress-bar" onclick="seekTo(event)">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="time-display">
-                    <span id="currentTime">0:00</span>
-                    <span id="totalTime">0:00</span>
-                </div>
-            </div>
-
-            <div class="player-controls">
-                <button class="control-btn" onclick="toggleShuffle()" id="shuffleBtn">⇄</button>
-                <button class="control-btn" onclick="previousTrack()">←</button>
-                <button class="control-btn play" onclick="togglePlay()" id="playBtn">▶</button>
-                <button class="control-btn" onclick="nextTrack()">→</button>
-                <button class="control-btn" onclick="shareCurrentTrack()">↑</button>
-            </div>
-
-            <div class="queue-container">
-                <div class="queue-header">
-                    <span>Warteschlange (<span id="queueCount">0</span>)</span>
-                    <button class="btn-secondary" style="padding: 4px 12px; font-size: 10px;" onclick="clearQueue()">Leeren</button>
-                </div>
-                <div id="queueList" class="queue-list">
-                    <div style="text-align: center; color: var(--text-secondary); padding: 40px 20px; font-size: 14px;">
-                        Füge Songs zur Warteschlange hinzu
-                    </div>
-                </div>
-            </div>
-
-            <div class="music-input-area">
-                <div class="input-wrapper">
-                    <input type="text" id="musicInput" class="panel-input" placeholder="YouTube Link oder ID...">
-                    <button class="voice-btn" onclick="startVoiceInput('music')">⌘</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chat Panel -->
-        <div id="chatPanel" class="side-panel">
-            <div class="panel-header">
-                <span class="panel-title chat">✉ CHAT</span>
-                <button class="panel-close" onclick="toggleChat()">×</button>
-            </div>
-            <div id="chatMessages"></div>
-            <div class="chat-input-area">
-                <div class="input-wrapper">
-                    <input type="text" id="chatInput" class="panel-input" placeholder="Nachricht...">
-                    <button class="voice-btn" onclick="startVoiceInput('chat')">⌘</button>
-                </div>
-                <button class="send-btn" onclick="sendChatMessage()">→</button>
-            </div>
-        </div>
-
-        <!-- Timer Overlay -->
-        <div id="timerOverlay" class="overlay-panel">
-            <div class="overlay-content">
-                <button class="overlay-close" onclick="closeTimer()">×</button>
-                <h2 class="overlay-title">◷ TIMER</h2>
-                <div class="timer-display" id="timerDisplay">00:00</div>
-                <div class="timer-inputs">
-                    <div class="time-field">
-                        <label>MIN</label>
-                        <input type="number" id="timerMinutes" min="0" max="99" value="5" onchange="updateTimerDisplay()">
-                    </div>
-                    <div class="time-field">
-                        <label>SEK</label>
-                        <input type="number" id="timerSeconds" min="0" max="59" value="0" onchange="updateTimerDisplay()">
-                    </div>
-                </div>
-                <div class="timer-controls">
-                    <button class="btn-primary" onclick="startTimer()">START</button>
-                    <button class="btn-secondary" onclick="resetTimer()">RESET</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Search Overlay -->
-        <div id="searchOverlay" class="overlay-panel">
-            <div class="overlay-content">
-                <button class="overlay-close" onclick="closeSearch()">×</button>
-                <h2 class="overlay-title">⌕ SUCHE</h2>
-                <div class="search-box" style="display: flex; gap: 8px; margin-bottom: 16px;">
-                    <div class="input-wrapper" style="flex:1">
-                        <input type="text" id="searchInput" class="panel-input" placeholder="Ort suchen...">
-                        <button class="voice-btn" onclick="startVoiceInput('search')">⌘</button>
-                    </div>
-                    <button class="btn-primary" onclick="performSearch(document.getElementById('searchInput').value)" style="padding: 10px 20px;">→</button>
-                </div>
-                <div id="searchResults"></div>
-            </div>
-        </div>
-
-        <!-- Status Overlay -->
-        <div id="statusOverlay" class="overlay-panel">
-            <div class="overlay-content">
-                <button class="overlay-close" onclick="closeStatus()">×</button>
-                <h2 class="overlay-title">● STATUS</h2>
-                <div class="status-options">
-                    <div class="status-option" onclick="updateStatus('🍕', 'Suche Essen')"><span>🍕</span><span>Suche Essen</span></div>
-                    <div class="status-option" onclick="updateStatus('☕', 'Kaffeepause')"><span>☕</span><span>Kaffeepause</span></div>
-                    <div class="status-option" onclick="updateStatus('🎵', 'Höre Musik', true)"><span>🎵</span><span>Höre Musik</span></div>
-                    <div class="status-option" onclick="updateStatus('🚗', 'Unterwegs')"><span>🚗</span><span>Unterwegs</span></div>
-                    <div class="status-option" onclick="updateStatus('🏠', 'Zuhause')"><span>🏠</span><span>Zuhause</span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quiz Overlay -->
-        <div id="quizOverlay" class="overlay-panel">
-            <div class="overlay-content">
-                <button class="overlay-close" onclick="toggleQuiz()">×</button>
-                <h2 class="overlay-title">? QUIZ</h2>
-                <div style="font-size: 16px; margin-bottom: 20px; color: var(--text-secondary);">Was bedeutet NABE?</div>
-                <div class="status-options">
-                    <button class="status-option" onclick="showToast('Falsch!')">Navigation and Beacon Environment</button>
-                    <button class="status-option" onclick="showToast('Richtig! ✓')">Neue Art der Begegnung</button>
-                    <button class="status-option" onclick="showToast('Falsch!')">North American Business Edition</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Speech Visualizer -->
-        <div id="speechVisualizer">
-            <span style="font-size: 12px; color: var(--text-secondary); font-family: 'Courier New', monospace;">HÖRE...</span>
-            <div class="speech-waves">
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-            </div>
-        </div>
-
-        <div id="toast"></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     </div>
+
+    <!-- FAB Menu -->
+    <div id="fabContainer">
+        <div class="fab-menu" id="fabMenu">
+            <div class="fab-item"><span class="fab-label">Standort teilen</span><button class="fab-btn" onclick="shareLocation()">📍</button></div>
+            <div class="fab-item"><span class="fab-label">Quiz</span><button class="fab-btn" onclick="toggleQuiz()">❓</button></div>
+            <div class="fab-item"><span class="fab-label">Musik suchen</span><button class="fab-btn" onclick="toggleSearch()">⌕</button></div>
+            <div class="fab-item"><span class="fab-label">Chat</span><button class="fab-btn" onclick="toggleChat()">💬</button></div>
+        </div>
+        <button id="fabMain" onclick="toggleFab()">+</button>
+    </div>
+
+    <!-- Chat Overlay -->
+    <div id="chatOverlay" class="overlay-panel">
+        <button class="overlay-close" onclick="toggleChat()">×</button>
+        <div class="overlay-title">NACHRICHTEN</div>
+        <div id="chatMessages"></div>
+        <div class="action-row">
+            <button class="action-btn" onclick="startVoiceInput()">🎤 Spracheingabe</button>
+            <button class="action-btn" onclick="shareLocation()">📍 Standort</button>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" class="panel-input" id="chatInput" placeholder="Nachricht..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+            <button class="send-btn" onclick="sendChatMessage()">➤</button>
+        </div>
+    </div>
+
+    <!-- Quiz Overlay -->
+    <div id="quizOverlay" class="overlay-panel">
+        <button class="overlay-close" onclick="toggleQuiz()">×</button>
+        <div class="overlay-title">QUIZ</div>
+        <div class="quiz-stats">
+            <span>Punkte: <b id="scoreDisplay">0</b></span>
+            <span>Frage <b id="questionDisplay">1</b>/10</span>
+        </div>
+        <div class="quiz-question" id="quizQuestion">Lade Frage...</div>
+        <div class="quiz-options" id="quizOptions"></div>
+        <div class="leaderboard">
+            <div class="lb-title">🏆 Bestenliste (Lokal)</div>
+            <div id="quizLeaderboard"></div>
+        </div>
+    </div>
+
+    <!-- Search Overlay -->
+    <div id="searchOverlay" class="overlay-panel">
+        <button class="overlay-close" onclick="toggleSearch()">×</button>
+        <div class="overlay-title">MUSIKSUCHE</div>
+        <div class="chat-input-area">
+            <input type="text" class="panel-input" id="searchInput" placeholder="Song, Künstler oder Ort..." onkeypress="if(event.key==='Enter') performSearch()">
+            <button class="send-btn" onclick="performSearch()">🔍</button>
+        </div>
+        <div id="searchResults"></div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
 
     <script>
-        // Safe LocalStorage
-        const safeStorage = {
-            get: (key, defaultVal) => {
-                try {
-                    const item = localStorage.getItem(key);
-                    return item ? JSON.parse(item) : defaultVal;
-                } catch (e) {
-                    return defaultVal;
-                }
-            },
-            set: (key, val) => {
-                try {
-                    localStorage.setItem(key, JSON.stringify(val));
-                    return true;
-                } catch (e) {
-                    return false;
-                }
-            }
-        };
-
-        // Firebase Setup
-        const firebaseConfig = { 
-            apiKey: "YOUR_API_KEY", 
-            authDomain: "demo.firebaseapp.com", 
-            databaseURL: "https://demo.firebaseio.com", 
-            projectId: "demo", 
-            storageBucket: "demo.appspot.com", 
-            messagingSenderId: "123456789", 
-            appId: "1:123456789:web:abcdef" 
+        // ===================== KONFIGURATION =====================
+        // ⚠️ ERSETZE DIES MIT DEINEN ECHTEN FIREBASE-DATEN!
+        const firebaseConfig = {
+            apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // ← Hier einfügen
+            authDomain: "dein-projekt.firebaseapp.com",
+            databaseURL: "https://dein-projekt-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "dein-projekt",
+            storageBucket: "dein-projekt.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
         };
         
-        let db = null, isFirebaseReady = false;
+        // YouTube API Key (optional, für echte Suche)
+        const YOUTUBE_API_KEY = "YOUR_YOUTUBE_API_KEY"; // ← Optional
+        
+        // Quiz-Daten (20 Fragen)
+        const quizData = [
+            {q: "Welches ist das kleinste Bundesland Deutschlands?", options: ["Saarland", "Bremen", "Hamburg"], correct: 1},
+            {q: "Wie viele Prozent der Erdoberfläche sind Wasser?", options: ["51%", "71%", "91%"], correct: 1},
+            {q: "In welchem Jahr wurde die Berliner Mauer gebaut?", options: ["1953", "1961", "1968"], correct: 1},
+            {q: "Was ist die Quadratwurzel von 144?", options: ["10", "12", "14"], correct: 1},
+            {q: "Welches Element hat das chemische Symbol 'Fe'?", options: ["Fluor", "Eisen", "Francium"], correct: 1},
+            {q: "Wer schrieb 'Faust'?", options: ["Schiller", "Goethe", "Lessing"], correct: 1},
+            {q: "Wie viele Kontinente gibt es?", options: ["5", "6", "7"], correct: 2},
+            {q: "Was ist die Hauptstadt von Kanada?", options: ["Toronto", "Vancouver", "Ottawa"], correct: 2},
+            {q: "Wie viele Planeten hat unser Sonnensystem?", options: ["7", "8", "9"], correct: 1},
+            {q: "In welchem Jahr fiel die Berliner Mauer?", options: ["1987", "1989", "1991"], correct: 1},
+            {q: "Wie viele Bits sind ein Byte?", options: ["4", "8", "16"], correct: 1},
+            {q: "Wer malte die Mona Lisa?", options: ["Michelangelo", "Leonardo da Vinci", "Raphael"], correct: 1},
+            {q: "Was ist die größte Wüste der Welt?", options: ["Sahara", "Antarktis", "Gobi"], correct: 1},
+            {q: "Wie viele Herzen hat ein Oktopus?", options: ["1", "2", "3"], correct: 2},
+            {q: "Welches Land hat die meisten Einwohner?", options: ["Indien", "China", "USA"], correct: 0},
+            {q: "Was bedeutet 'NABE'?", options: ["Nachbarschaft", "Navigation Based Environment", "Kein Akronym"], correct: 1},
+            {q: "Wie viele Zeitzonen hat Russland?", options: ["5", "9", "11"], correct: 2},
+            {q: "Welcher ist der höchste Berg Europas?", options: ["Mont Blanc", "Elbrus", "Matterhorn"], correct: 1},
+            {q: "In welchem Jahr wurde das iPhone veröffentlicht?", options: ["2005", "2007", "2009"], correct: 1},
+            {q: "Wie viele Farben hat ein Regenbogen?", options: ["5", "7", "9"], correct: 1}
+        ];
+
+        // ===================== GLOBALE VARIABLEN =====================
+        let map, currentPosition, chatDB, player, currentTrack = null, isPlaying = false;
+        let quizIndex = 0, quizScore = 0, quizAnswered = false;
+        let messageQueue = [];
+
+        // ===================== INITIALISIERUNG =====================
+        // Firebase initialisieren (wenn Config vorhanden)
+        let firebaseInitialized = false;
         try {
-            if (firebaseConfig.apiKey !== "YOUR_API_KEY" && typeof firebase !== 'undefined') {
+            if (firebaseConfig.apiKey.includes("XXXX")) {
+                console.log("Firebase: Mock-Modus (keine Keys)");
+                simulateIncomingMessages();
+            } else {
                 firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
-                isFirebaseReady = true;
-            }
-        } catch (e) {
-            console.warn('Firebase nicht verfügbar:', e);
-        }
-
-        // Global State
-        let map = null, userMarker = null, userPosition = null, fabOpen = false;
-        let timerInterval = null, timerSeconds = 0;
-        let recognition = null, currentVoiceTarget = null;
-        let userId = 'user_' + Math.random().toString(36).substr(2, 9);
-        let isLocationActive = false;
-
-        // Music State
-        let player = null, queue = [];
-        let currentTrackIndex = -1, isPlaying = false, isShuffle = false, playerReady = false;
-        let visualizerInterval = null;
-        let progressAnimationId = null;
-
-        // Initialize queue from storage
-        try {
-            queue = safeStorage.get('nabe_queue', []);
-        } catch (e) {
-            queue = [];
-        }
-
-        // YouTube API
-        function onYouTubeIframeAPIReady() {
-            try {
-                player = new YT.Player('youtubePlayer', {
-                    width: '1', 
-                    height: '1',
-                    playerVars: { 
-                        playsinline: 1, 
-                        controls: 0, 
-                        disablekb: 1, 
-                        fs: 0, 
-                        modestbranding: 1, 
-                        rel: 0, 
-                        showinfo: 0 
-                    },
-                    events: { 
-                        'onReady': onPlayerReady, 
-                        'onStateChange': onPlayerStateChange,
-                        'onError': onPlayerError
-                    }
+                chatDB = firebase.database().ref('nabeChat');
+                chatDB.on('child_added', snap => {
+                    const msg = snap.val();
+                    if (!msg.own) addChatMessage(msg, true);
                 });
-            } catch (e) {
-                console.error('YouTube Player Init Fehler:', e);
-                showToast('Musik-Player konnte nicht geladen werden');
+                firebaseInitialized = true;
             }
+        } catch(e) {
+            console.error("Firebase Error:", e);
+            simulateIncomingMessages();
         }
 
-        function onPlayerReady() {
-            playerReady = true;
-            generateVisualizerBars();
-            updateQueueUI();
-            if (queue.length > 0) {
-                loadTrack(0, false);
-            }
+        function simulateIncomingMessages() {
+            // Demo-Nachrichten wenn kein Firebase
+            setTimeout(() => {
+                addChatMessage({text: "Willkommen bei NABE! 👋", system: true});
+            }, 2000);
         }
 
-        function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.PLAYING) {
-                isPlaying = true;
-                updatePlayButton();
-                startProgressUpdate();
-                startVisualizer();
-                const nowPlaying = document.getElementById('nowPlaying');
-                const miniPlayer = document.getElementById('miniPlayer');
-                if (nowPlaying) nowPlaying.classList.add('playing');
-                if (miniPlayer) miniPlayer.classList.add('playing');
-            } else if (event.data == YT.PlayerState.PAUSED) {
-                isPlaying = false;
-                updatePlayButton();
-                stopVisualizer();
-                const nowPlaying = document.getElementById('nowPlaying');
-                const miniPlayer = document.getElementById('miniPlayer');
-                if (nowPlaying) nowPlaying.classList.remove('playing');
-                if (miniPlayer) miniPlayer.classList.remove('playing');
-            } else if (event.data == YT.PlayerState.ENDED) {
-                nextTrack();
-            }
-        }
-
-        function onPlayerError(event) {
-            console.error('YouTube Player Error:', event.data);
-            showToast('Fehler beim Abspielen. Überspringe...');
-            setTimeout(nextTrack, 2000);
-        }
-
-        function generateVisualizerBars() {
-            const container = document.getElementById('visualizer');
-            if (!container) return;
-            container.innerHTML = '';
-            for (let i = 0; i < 16; i++) {
-                const bar = document.createElement('div');
-                bar.className = 'viz-bar';
-                container.appendChild(bar);
-            }
-        }
-
-        function startVisualizer() {
-            stopVisualizer();
-            const bars = document.querySelectorAll('.viz-bar');
-            if (bars.length === 0) return;
-            visualizerInterval = setInterval(() => {
-                bars.forEach(bar => {
-                    bar.style.height = (Math.random() * 40 + 4) + 'px';
-                });
-            }, 100);
-        }
-
-        function stopVisualizer() {
-            if (visualizerInterval) {
-                clearInterval(visualizerInterval);
-                visualizerInterval = null;
-            }
-            document.querySelectorAll('.viz-bar').forEach(bar => {
-                bar.style.height = '4px';
-            });
-        }
-
-        // Music Functions
-        function extractVideoId(url) {
-            if (!url || typeof url !== 'string') return null;
-            url = url.trim();
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : (url.length === 11 ? url : null);
-        }
-
-        function addToQueue(input) {
-            const videoId = extractVideoId(input);
-            if (!videoId) { 
-                showToast('Ungültiger YouTube Link'); 
-                return; 
-            }
-            
-            const track = {
-                id: videoId,
-                title: 'Track ' + (queue.length + 1),
-                artist: 'YouTube Audio',
-                thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
-            };
-            
-            queue.push(track);
-            safeStorage.set('nabe_queue', queue);
-            updateQueueUI();
-            
-            if (queue.length === 1 && playerReady) {
-                loadTrack(0, false);
-            }
-            showToast('Zur Warteschlange hinzugefügt');
-            
-            const musicInput = document.getElementById('musicInput');
-            if (musicInput) musicInput.value = '';
-        }
-
-        function loadTrack(index, autoplay) {
-            if (!playerReady || !player || !player.loadVideoById) return;
-            if (index < 0 || index >= queue.length) return;
-            
-            currentTrackIndex = index;
-            const track = queue[index];
-            
-            try {
-                player.loadVideoById(track.id);
-                if (!autoplay) player.pauseVideo();
-                
-                const albumArt = document.getElementById('albumArt');
-                const trackTitle = document.getElementById('trackTitle');
-                const trackArtist = document.getElementById('trackArtist');
-                
-                if (albumArt) albumArt.src = track.thumbnail;
-                if (trackTitle) trackTitle.textContent = track.title;
-                if (trackArtist) trackArtist.textContent = track.artist;
-                
-                updateQueueUI();
-                updateMiniPlayer();
-            } catch (e) {
-                console.error('Fehler beim Laden des Tracks:', e);
-                showToast('Fehler beim Laden');
-            }
-        }
-
-        function togglePlay() {
-            if (!playerReady || !player) return;
-            
-            try {
-                if (currentTrackIndex === -1 && queue.length > 0) {
-                    loadTrack(0, true);
-                } else if (isPlaying) {
-                    player.pauseVideo();
-                } else {
-                    player.playVideo();
-                }
-            } catch (e) {
-                console.error('Playback Fehler:', e);
-            }
-        }
-
-        function nextTrack() {
-            if (queue.length === 0) return;
-            let nextIndex;
-            if (isShuffle) {
-                nextIndex = Math.floor(Math.random() * queue.length);
-            } else {
-                nextIndex = currentTrackIndex + 1;
-                if (nextIndex >= queue.length) nextIndex = 0;
-            }
-            loadTrack(nextIndex, true);
-        }
-
-        function previousTrack() {
-            if (queue.length === 0) return;
-            let prevIndex = currentTrackIndex - 1;
-            if (prevIndex < 0) prevIndex = queue.length - 1;
-            loadTrack(prevIndex, true);
-        }
-
-        function toggleShuffle() {
-            isShuffle = !isShuffle;
-            const shuffleBtn = document.getElementById('shuffleBtn');
-            if (shuffleBtn) {
-                shuffleBtn.style.color = isShuffle ? 'var(--accent-cyan)' : 'var(--text-secondary)';
-            }
-            showToast(isShuffle ? 'Shuffle: An' : 'Shuffle: Aus');
-        }
-
-        function removeFromQueue(index) {
-            if (index < 0 || index >= queue.length) return;
-            
-            queue.splice(index, 1);
-            if (currentTrackIndex === index) {
-                if (player && player.stopVideo) {
-                    try { player.stopVideo(); } catch(e) {}
-                }
-                currentTrackIndex = -1;
-                if (queue.length > 0) loadTrack(0, false);
-            } else if (currentTrackIndex > index) {
-                currentTrackIndex--;
-            }
-            
-            safeStorage.set('nabe_queue', queue);
-            updateQueueUI();
-        }
-
-        function clearQueue() {
-            queue = [];
-            currentTrackIndex = -1;
-            if (player && player.stopVideo) {
-                try { player.stopVideo(); } catch(e) {}
-            }
-            safeStorage.set('nabe_queue', queue);
-            updateQueueUI();
-            
-            const trackTitle = document.getElementById('trackTitle');
-            const trackArtist = document.getElementById('trackArtist');
-            if (trackTitle) trackTitle.textContent = 'Kein Titel';
-            if (trackArtist) trackArtist.textContent = 'Warteschlange ist leer';
-            updateMiniPlayer();
-        }
-
-        function updateQueueUI() {
-            const list = document.getElementById('queueList');
-            const count = document.getElementById('queueCount');
-            
-            if (count) count.textContent = queue.length;
-            
-            if (!list) return;
-            
-            if (queue.length === 0) {
-                list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 40px 20px; font-size: 14px;">Füge Songs zur Warteschlange hinzu</div>';
-                return;
-            }
-            
-            list.innerHTML = queue.map((track, idx) => `
-                <div class="queue-item ${idx === currentTrackIndex ? 'active' : ''}" onclick="playTrack(${idx})">
-                    <span class="queue-number">${idx === currentTrackIndex ? '▶' : idx + 1}</span>
-                    <img class="queue-thumb" src="${track.thumbnail}" alt="" onerror="this.style.display='none'">
-                    <div class="queue-info">
-                        <div class="queue-title">${track.title}</div>
-                        <div class="queue-artist">${track.artist}</div>
-                    </div>
-                    <button class="queue-remove" onclick="event.stopPropagation(); removeFromQueue(${idx})">×</button>
-                </div>
-            `).join('');
-        }
-
-        function playTrack(index) { 
-            loadTrack(index, true); 
-        }
-        
-        function updatePlayButton() { 
-            const btn = document.getElementById('playBtn');
-            if (btn) btn.textContent = isPlaying ? '❚❚' : '▶'; 
-        }
-        
-        function updateMiniPlayer() {
-            const mini = document.getElementById('miniPlayer');
-            if (!mini) return;
-            
-            if (currentTrackIndex === -1 || queue.length === 0) {
-                mini.classList.remove('active');
-                return;
-            }
-            
-            const track = queue[currentTrackIndex];
-            const titleEl = document.querySelector('.mini-title');
-            const artistEl = document.querySelector('.mini-artist');
-            
-            if (titleEl) titleEl.textContent = track.title;
-            if (artistEl) artistEl.textContent = track.artist;
-            mini.classList.add('active');
-        }
-
-        function startProgressUpdate() {
-            stopProgressUpdate();
-            
-            const update = () => {
-                if (!isPlaying || !player || !player.getCurrentTime) return;
-                
-                try {
-                    const current = player.getCurrentTime();
-                    const duration = player.getDuration();
-                    
-                    if (duration > 0) {
-                        const progressFill = document.getElementById('progressFill');
-                        const currentTime = document.getElementById('currentTime');
-                        const totalTime = document.getElementById('totalTime');
-                        
-                        if (progressFill) progressFill.style.width = (current / duration) * 100 + '%';
-                        if (currentTime) currentTime.textContent = formatTime(current);
-                        if (totalTime) totalTime.textContent = formatTime(duration);
-                    }
-                    
-                    progressAnimationId = requestAnimationFrame(update);
-                } catch(e) {
-                    stopProgressUpdate();
-                }
-            };
-            
-            progressAnimationId = requestAnimationFrame(update);
-        }
-
-        function stopProgressUpdate() {
-            if (progressAnimationId) {
-                cancelAnimationFrame(progressAnimationId);
-                progressAnimationId = null;
-            }
-        }
-
-        function formatTime(seconds) {
-            if (isNaN(seconds) || seconds < 0) return '0:00';
-            const m = Math.floor(seconds / 60);
-            const s = Math.floor(seconds % 60);
-            return `${m}:${s.toString().padStart(2, '0')}`;
-        }
-
-        function seekTo(event) {
-            if (!player || !player.getDuration) return;
-            
-            try {
-                const rect = event.currentTarget.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const percent = x / rect.width;
-                player.seekTo(player.getDuration() * percent, true);
-            } catch (e) {
-                console.error('Seek Fehler:', e);
-            }
-        }
-
-        function shareCurrentTrack() {
-            if (currentTrackIndex === -1 || !queue[currentTrackIndex]) return;
-            
-            const track = queue[currentTrackIndex];
-            const url = `https://youtube.com/watch?v=${track.id}`;
-            
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url).then(() => {
-                    showToast('Link kopiert');
-                    sendSystemMessage(`♫ Hört: ${track.title}`);
-                }).catch(() => {
-                    showToast('Kopieren fehlgeschlagen');
-                });
-            } else {
-                // Fallback
-                const textArea = document.createElement('textarea');
-                textArea.value = url;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                showToast('Link kopiert');
-            }
-        }
-
-        // Map Functions
-        function initMap(pos) {
-            // Prüfen ob Leaflet geladen ist
-            if (typeof L === 'undefined') {
-                console.error('Leaflet ist nicht geladen');
-                showToast('Karten-Bibliothek nicht verfügbar');
-                document.getElementById('mapLoading').innerHTML = 'Fehler: Karte konnte nicht geladen werden.<br>Bitte Seite neu laden.';
-                return;
-            }
-            
-            const mapContainer = document.getElementById('map');
-            if (!mapContainer) return;
-            
-            // Loading entfernen
-            const loading = document.getElementById('mapLoading');
-            if (loading) loading.style.display = 'none';
-            
-            try {
-                map = L.map('map', { 
-                    zoomControl: false, 
-                    attributionControl: false 
-                }).setView([pos.lat, pos.lng], 16);
-                
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    maxZoom: 19,
-                    subdomains: 'abcd',
-                    crossOrigin: true
-                }).addTo(map);
-
-                // User Marker
-                const icon = L.divIcon({
-                    className: 'custom-marker',
-                    iconSize: [16, 16],
-                    iconAnchor: [8, 8]
-                });
-                
-                userMarker = L.marker([pos.lat, pos.lng], { 
-                    icon: icon, 
-                    zIndexOffset: 1000 
-                }).addTo(map);
-                
-                // Accuracy Circle
-                if (pos.accuracy) {
-                    L.circle([pos.lat, pos.lng], {
-                        radius: pos.accuracy,
-                        color: '#00d4ff',
-                        fillColor: '#00d4ff',
-                        fillOpacity: 0.1,
-                        weight: 1
-                    }).addTo(map);
-                }
-
-                // Demo Markers
-                addDemoMarkers(pos);
-                
-                // Start watching position
-                if (isLocationActive && navigator.geolocation) {
-                    navigator.geolocation.watchPosition(
-                        (position) => {
-                            if (userMarker && position.coords) {
-                                userMarker.setLatLng([position.coords.latitude, position.coords.longitude]);
-                                userPosition = { 
-                                    lat: position.coords.latitude, 
-                                    lng: position.coords.longitude 
-                                };
-                                updateLocationDisplay();
-                            }
-                        },
-                        (error) => console.warn('Position Watch Error:', error),
-                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-                    );
-                }
-            } catch (e) {
-                console.error('Map Init Fehler:', e);
-                showToast('Karte konnte nicht geladen werden');
-                document.getElementById('mapLoading').innerHTML = 'Fehler beim Initialisieren der Karte.';
-            }
-        }
-
-        function addDemoMarkers(userPos) {
-            if (!map || !userPos) return;
-            
-            const offsets = [
-                [0.002, 0.001], [-0.001, 0.002], [0.001, -0.001], [-0.002, -0.002]
-            ];
-            
-            offsets.forEach((offset) => {
-                try {
-                    L.marker([userPos.lat + offset[0], userPos.lng + offset[1]], {
-                        icon: L.divIcon({
-                            className: 'custom-marker',
-                            iconSize: [12, 12],
-                            iconAnchor: [6, 6]
-                        })
-                    }).addTo(map);
-                } catch (e) {
-                    console.warn('Demo Marker Fehler:', e);
-                }
-            });
-        }
-
+        // ===================== STANDORT & KARTE =====================
         function requestLocation() {
-            const gateError = document.getElementById('gateError');
-            
             if (!navigator.geolocation) {
-                if (gateError) {
-                    gateError.textContent = 'Geolocation wird von diesem Browser nicht unterstützt';
-                    gateError.style.display = 'block';
-                }
+                showToast("Geolocation nicht unterstützt");
+                initMap([52.52, 13.405]); // Berlin Fallback
                 return;
             }
             
             navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    if (!position.coords) {
-                        if (gateError) {
-                            gateError.textContent = 'Standortdaten nicht verfügbar';
-                            gateError.style.display = 'block';
-                        }
-                        return;
-                    }
-                    
-                    userPosition = { 
-                        lat: position.coords.latitude, 
-                        lng: position.coords.longitude,
-                        accuracy: position.coords.accuracy 
-                    };
-                    
-                    isLocationActive = true;
-                    enterApp();
-                    initMap(userPosition);
-                    updateLocationDisplay();
+                pos => {
+                    const coords = [pos.coords.latitude, pos.coords.longitude];
+                    document.getElementById('locationGate').style.opacity = '0';
+                    setTimeout(() => document.getElementById('locationGate').remove(), 500);
+                    initMap(coords);
                 },
-                (error) => {
-                    let errorMsg = 'Standort konnte nicht ermittelt werden';
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMsg = 'Standort-Zugriff verweigert. Bitte in den Browsereinstellungen erlauben.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMsg = 'Standortdaten nicht verfügbar';
-                            break;
-                        case error.TIMEOUT:
-                            errorMsg = 'Zeitüberschreitung bei der Standortermittlung';
-                            break;
-                    }
-                    if (gateError) {
-                        gateError.textContent = errorMsg;
-                        gateError.style.display = 'block';
-                    }
+                err => {
+                    showToast("Standortzugriff verweigert. Fallback Berlin.");
+                    initMap([52.52, 13.405]);
                 },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+                {enableHighAccuracy: true, timeout: 10000}
             );
         }
 
-        function skipLocation() {
-            isLocationActive = false;
-            userPosition = { lat: 52.5200, lng: 13.4050 }; // Berlin als Default
-            enterApp();
-            initMap(userPosition);
-            updateLocationDisplay();
-            showToast('Demo-Modus: Berlin');
+        function initMap(coords) {
+            currentPosition = coords;
+            map = L.map('map', {zoomControl: false, attributionControl: false}).setView(coords, 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Eigene Position markieren
+            L.circleMarker(coords, {
+                radius: 8,
+                fillColor: "#ffffff",
+                color: "#000",
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 1
+            }).addTo(map).bindPopup("Du bist hier").openPopup();
+            
+            // Demo-Orte in der Nähe
+            if (coords[0] !== 52.52) addNearbyPlaces(coords);
         }
 
-        function enterApp() {
-            const gate = document.getElementById('locationGate');
-            const mainApp = document.getElementById('mainApp');
+        function addNearbyPlaces(center) {
+            const places = [
+                {name: "Café Central", lat: center[0]+0.001, lng: center[1]+0.001, type: "coffee"},
+                {name: "Parkbank", lat: center[0]-0.001, lng: center[1]-0.001, type: "park"},
+                {name: "U-Bahn Station", lat: center[0]+0.0015, lng: center[1]-0.0008, type: "transport"}
+            ];
             
-            if (gate) gate.classList.add('hidden');
-            if (mainApp) mainApp.classList.add('active');
-            
-            setTimeout(() => {
-                const fabContainer = document.getElementById('fabContainer');
-                const compassBtn = document.getElementById('compassBtn');
-                const posIndicator = document.getElementById('posIndicator');
-                
-                if (fabContainer) fabContainer.classList.add('visible');
-                if (compassBtn) compassBtn.classList.add('visible');
-                if (posIndicator) posIndicator.classList.add('visible');
-            }, 500);
+            places.forEach(p => {
+                L.marker([p.lat, p.lng]).addTo(map)
+                    .bindPopup(`<b>${p.name}</b><br>${p.type}`);
+            });
         }
 
-        function updateLocationDisplay() {
-            const posText = document.getElementById('posText');
-            if (posText && userPosition) {
-                posText.textContent = `${userPosition.lat.toFixed(4)}, ${userPosition.lng.toFixed(4)}`;
+        function shareLocation() {
+            if (!currentPosition) {
+                showToast("Kein Standort verfügbar");
+                return;
+            }
+            const lat = currentPosition[0].toFixed(4);
+            const lng = currentPosition[1].toFixed(4);
+            const msg = {
+                text: `Mein Standort: ${lat}, ${lng}`,
+                location: {lat, lng},
+                timestamp: Date.now(),
+                own: true
+            };
+            addChatMessage(msg);
+            if (firebaseInitialized) chatDB.push(msg);
+            showToast("Standort geteilt!");
+            if (document.getElementById('chatOverlay').classList.contains('active')) {
+                toggleFab(); // Menü schließen falls offen
             }
         }
 
-        function recenterMap() {
-            if (map && userPosition) {
-                try {
-                    map.panTo([userPosition.lat, userPosition.lng]);
-                } catch (e) {
-                    console.error('Recenter Fehler:', e);
-                }
+        // ===================== CHAT SYSTEM =====================
+        function toggleChat() {
+            document.getElementById('chatOverlay').classList.toggle('active');
+            if (document.getElementById('chatOverlay').classList.contains('active')) {
+                scrollToBottom();
             }
         }
 
-        // Chat Functions
+        function addChatMessage(msg, fromOthers = false) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'msg ' + (msg.system ? 'system' : (msg.own ? 'own' : 'other'));
+            
+            let content = msg.text;
+            if (msg.location) {
+                content += `<span class="location-tag" onclick="map.setView([${msg.location.lat}, ${msg.location.lng}], 16)">📍 Auf Karte zeigen</span>`;
+            }
+            div.innerHTML = content;
+            container.appendChild(div);
+            scrollToBottom();
+        }
+
         function sendChatMessage() {
             const input = document.getElementById('chatInput');
-            if (!input) return;
-            
             const text = input.value.trim();
             if (!text) return;
             
+            const msg = {
+                text: text,
+                timestamp: Date.now(),
+                own: true
+            };
+            addChatMessage(msg);
+            if (firebaseInitialized) chatDB.push(msg);
             input.value = '';
-            addChatMessage(text, 'own', userId, Date.now());
+        }
+
+        function scrollToBottom() {
+            const container = document.getElementById('chatMessages');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // ===================== SPRACHEINGABE =====================
+        function startVoiceInput() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showToast("Spracherkennung nicht verfügbar");
+                return;
+            }
             
-            // Echo für Demo
-            setTimeout(() => {
-                addChatMessage(text, 'other', 'echo_' + Math.random().toString(36).substr(2, 5), Date.now());
-            }, 1000);
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'de-DE';
+            recognition.continuous = false;
+            recognition.interimResults = false;
             
-            // Firebase Integration (falls verfügbar)
-            if (isFirebaseReady && db) {
-                try {
-                    db.ref('messages').push({
-                        text: text,
-                        user: userId,
-                        timestamp: Date.now()
-                    });
-                } catch (e) {
-                    console.warn('Firebase Send Fehler:', e);
-                }
+            document.getElementById('voiceIndicator').classList.add('active');
+            
+            recognition.onresult = event => {
+                const text = event.results[0][0].transcript;
+                document.getElementById('chatInput').value = text;
+                setTimeout(() => sendChatMessage(), 500);
+                document.getElementById('voiceIndicator').classList.remove('active');
+            };
+            
+            recognition.onerror = () => {
+                showToast("Spracherkennung fehlgeschlagen");
+                document.getElementById('voiceIndicator').classList.remove('active');
+            };
+            
+            recognition.onend = () => {
+                document.getElementById('voiceIndicator').classList.remove('active');
+            };
+            
+            recognition.start();
+        }
+
+        // ===================== QUIZ SYSTEM =====================
+        function toggleQuiz() {
+            const overlay = document.getElementById('quizOverlay');
+            overlay.classList.toggle('active');
+            if (overlay.classList.contains('active')) {
+                initQuiz();
             }
         }
 
-        function sendSystemMessage(text) {
-            addChatMessage(text, 'system', 'system', Date.now());
+        function initQuiz() {
+            quizIndex = 0;
+            quizScore = 0;
+            updateQuizStats();
+            loadQuestion();
+            updateLeaderboard();
         }
 
-        function addChatMessage(text, type, user, timestamp) {
-            const messages = document.getElementById('chatMessages');
-            if (!messages) return;
+        function loadQuestion() {
+            if (quizIndex >= 10) {
+                endQuiz();
+                return;
+            }
+            const q = quizData[quizIndex];
+            document.getElementById('quizQuestion').textContent = q.q;
+            const optsContainer = document.getElementById('quizOptions');
+            optsContainer.innerHTML = '';
             
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${type}`;
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-option';
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(idx, btn);
+                optsContainer.appendChild(btn);
+            });
+            quizAnswered = false;
+            updateQuizStats();
+        }
+
+        function checkAnswer(selectedIdx, btnElement) {
+            if (quizAnswered) return;
+            quizAnswered = true;
             
-            if (type === 'system') {
-                msgDiv.innerHTML = text;
+            const q = quizData[quizIndex];
+            const options = document.querySelectorAll('.quiz-option');
+            
+            options.forEach((opt, idx) => {
+                opt.classList.add('disabled');
+                if (idx === q.correct) opt.classList.add('correct');
+            });
+            
+            if (selectedIdx === q.correct) {
+                quizScore += 10;
+                showToast("Richtig! +10 Punkte");
             } else {
-                const time = new Date(timestamp).toLocaleTimeString('de-DE', {
-                    hour: '2-digit', 
-                    minute:'2-digit'
-                });
-                msgDiv.innerHTML = `<div>${escapeHtml(text)}</div><div class="message-meta">${time}</div>`;
+                btnElement.classList.add('wrong');
+                showToast("Falsch!");
             }
             
-            messages.appendChild(msgDiv);
-            messages.scrollTop = messages.scrollHeight;
+            updateQuizStats();
+            setTimeout(() => {
+                quizIndex++;
+                loadQuestion();
+            }, 1500);
+        }
+
+        function updateQuizStats() {
+            document.getElementById('scoreDisplay').textContent = quizScore;
+            document.getElementById('questionDisplay').textContent = Math.min(quizIndex + 1, 10);
+        }
+
+        function endQuiz() {
+            document.getElementById('quizQuestion').textContent = `Quiz beendet! Du hast ${quizScore}/100 Punkten erreicht.`;
+            document.getElementById('quizOptions').innerHTML = '<button class="quiz-option" onclick="initQuiz()" style="background:rgba(255,255,255,0.1)">Neues Quiz starten</button>';
+            saveScore(quizScore);
+        }
+
+        function saveScore(score) {
+            const lb = JSON.parse(localStorage.getItem('nabeQuizLB') || '[]');
+            const entry = {name: 'Du', score: score, date: new Date().toLocaleDateString()};
+            lb.push(entry);
+            lb.sort((a,b) => b.score - a.score);
+            localStorage.setItem('nabeQuizLB', JSON.stringify(lb.slice(0, 10)));
+            updateLeaderboard();
+        }
+
+        function updateLeaderboard() {
+            const lb = JSON.parse(localStorage.getItem('nabeQuizLB') || '[]');
+            const container = document.getElementById('quizLeaderboard');
+            if (lb.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#666;font-size:13px">Noch keine Einträge</div>';
+                return;
+            }
+            container.innerHTML = lb.slice(0, 5).map((e,i) => 
+                `<div class="lb-entry ${i===0?'top':''}"><span>${i+1}. ${e.name}</span><span>${e.score} Pkt</span></div>`
+            ).join('');
+        }
+
+        // ===================== MUSIKSUCHE & PLAYER =====================
+        function toggleSearch() {
+            document.getElementById('searchOverlay').classList.toggle('active');
+        }
+
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+            
+            const container = document.getElementById('searchResults');
+            container.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Suche...</div>';
+            
+            // Wenn YouTube API Key vorhanden, echte Suche
+            if (YOUTUBE_API_KEY && !YOUTUBE_API_KEY.includes("YOUR")) {
+                try {
+                    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`);
+                    const data = await res.json();
+                    displayYouTubeResults(data.items);
+                } catch(e) {
+                    fallbackSearch(query);
+                }
+            } else {
+                // Fallback: Demo-Ergebnisse
+                setTimeout(() => fallbackSearch(query), 500);
+            }
+        }
+
+        function fallbackSearch(query) {
+            const mockResults = [
+                {id: 'dQw4w9WgXcQ', title: `${query} (Official Video)`, artist: 'YouTube Music', thumb: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg'},
+                {id: '9bZkp7q19f0', title: `${query} - Live Version`, artist: 'Live Channel', thumb: 'https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg'},
+                {id: 'kJQP7kiw5Fk', title: `Best of ${query}`, artist: 'Mix Channel', thumb: 'https://img.youtube.com/vi/kJQP7kiw5Fk/mqdefault.jpg'}
+            ];
+            displayYouTubeResults(mockResults.map(r => ({
+                id: {videoId: r.id},
+                snippet: {title: r.title, channelTitle: r.artist, thumbnails: {medium: {url: r.thumb}}}
+            })));
+        }
+
+        function displayYouTubeResults(items) {
+            const container = document.getElementById('searchResults');
+            container.innerHTML = items.map(item => `
+                <div class="search-result" onclick="playTrack('${item.id.videoId}', '${escapeHtml(item.snippet.title)}', '${escapeHtml(item.snippet.channelTitle)}', '${item.snippet.thumbnails.medium.url}')">
+                    <img class="search-thumb" src="${item.snippet.thumbnails.medium.url}">
+                    <div class="search-info">
+                        <div class="search-title">${escapeHtml(item.snippet.title)}</div>
+                        <div class="search-meta">${escapeHtml(item.snippet.channelTitle)}</div>
+                    </div>
+                    <span class="search-type">▶</span>
+                </div>
+            `).join('');
         }
 
         function escapeHtml(text) {
@@ -1914,309 +601,147 @@
             return div.innerHTML;
         }
 
-        // Speech Recognition
-        function initSpeechRecognition() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                return null;
-            }
+        function playTrack(videoId, title, artist, thumb) {
+            currentTrack = {videoId, title, artist, thumb};
             
-            try {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                const rec = new SpeechRecognition();
-                rec.lang = 'de-DE';
-                rec.continuous = false;
-                rec.interimResults = false;
-                
-                rec.onstart = () => {
-                    const visualizer = document.getElementById('speechVisualizer');
-                    if (visualizer) visualizer.classList.add('active');
-                    document.querySelectorAll('.voice-btn').forEach(btn => {
-                        if (btn) btn.classList.add('recording');
-                    });
-                };
-                
-                rec.onend = () => {
-                    const visualizer = document.getElementById('speechVisualizer');
-                    if (visualizer) visualizer.classList.remove('active');
-                    document.querySelectorAll('.voice-btn').forEach(btn => {
-                        if (btn) btn.classList.remove('recording');
-                    });
-                };
-                
-                rec.onresult = (event) => {
-                    if (!event.results || !event.results[0]) return;
-                    const text = event.results[0][0].transcript;
-                    
-                    if (currentVoiceTarget === 'chat') {
-                        const chatInput = document.getElementById('chatInput');
-                        if (chatInput) chatInput.value = text;
-                        sendChatMessage();
-                    } else if (currentVoiceTarget === 'music') {
-                        const musicInput = document.getElementById('musicInput');
-                        if (musicInput) {
-                            musicInput.value = text;
-                            addToQueue(text);
-                        }
-                    } else if (currentVoiceTarget === 'search') {
-                        const searchInput = document.getElementById('searchInput');
-                        if (searchInput) {
-                            searchInput.value = text;
-                            performSearch(text);
-                        }
-                    }
-                };
-                
-                rec.onerror = (event) => {
-                    console.warn('Speech Recognition Error:', event.error);
-                    showToast('Spracherkennung fehlgeschlagen');
-                };
-                
-                return rec;
-            } catch (e) {
-                console.warn('Speech Init Fehler:', e);
-                return null;
-            }
-        }
-
-        function startVoiceInput(target) {
-            if (!recognition) {
-                recognition = initSpeechRecognition();
-            }
-            if (!recognition) {
-                showToast('Spracherkennung nicht verfügbar');
-                return;
-            }
+            // YouTube Player initialisieren (versteckt)
+            if (player) player.destroy();
             
-            currentVoiceTarget = target;
-            try {
-                recognition.start();
-            } catch(e) {
-                try {
-                    recognition.stop();
-                    setTimeout(() => recognition.start(), 100);
-                } catch(e2) {
-                    showToast('Fehler beim Starten der Spracherkennung');
-                }
-            }
-        }
-
-        // UI Toggles
-        function toggleFab() {
-            fabOpen = !fabOpen;
-            const fabMain = document.getElementById('fabMain');
-            const fabMenu = document.getElementById('fabMenu');
+            const div = document.createElement('div');
+            div.id = 'ytPlayer';
+            div.style.position = 'absolute';
+            div.style.left = '-9999px';
+            document.body.appendChild(div);
             
-            if (fabMain) fabMain.classList.toggle('active');
-            if (fabMenu) fabMenu.classList.toggle('active');
-        }
-
-        function toggleChat() {
-            const chatPanel = document.getElementById('chatPanel');
-            const musicPanel = document.getElementById('musicPanel');
-            const musicFabBtn = document.getElementById('musicFabBtn');
-            
-            if (chatPanel) chatPanel.classList.toggle('open');
-            if (musicPanel) musicPanel.classList.remove('open');
-            if (musicFabBtn) musicFabBtn.classList.remove('active');
-            
-            if (chatPanel && chatPanel.classList.contains('open')) {
-                const chatMessages = document.getElementById('chatMessages');
-                if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-        }
-
-        function toggleMusic() {
-            const musicPanel = document.getElementById('musicPanel');
-            const chatPanel = document.getElementById('chatPanel');
-            const musicFabBtn = document.getElementById('musicFabBtn');
-            
-            if (musicPanel) musicPanel.classList.toggle('open');
-            if (chatPanel) chatPanel.classList.remove('open');
-            if (musicFabBtn) musicFabBtn.classList.toggle('active');
-        }
-
-        function toggleTimer() { 
-            const timerOverlay = document.getElementById('timerOverlay');
-            if (timerOverlay) timerOverlay.classList.toggle('active'); 
-            if (fabOpen) toggleFab(); 
-            updateTimerDisplay(); 
-        }
-        
-        function closeTimer() { 
-            const timerOverlay = document.getElementById('timerOverlay');
-            if (timerOverlay) timerOverlay.classList.remove('active'); 
-        }
-        
-        function toggleSearch() { 
-            const searchOverlay = document.getElementById('searchOverlay');
-            if (searchOverlay) searchOverlay.classList.toggle('active'); 
-            if (fabOpen) toggleFab(); 
-        }
-        
-        function closeSearch() { 
-            const searchOverlay = document.getElementById('searchOverlay');
-            if (searchOverlay) searchOverlay.classList.remove('active'); 
-        }
-        
-        function performSearch(query) {
-            const searchResults = document.getElementById('searchResults');
-            if (!searchResults) return;
-            
-            if (!query || query.trim() === '') {
-                searchResults.innerHTML = '<div style="padding: 20px; color: var(--text-secondary);">Bitte Suchbegriff eingeben</div>';
-                return;
-            }
-            
-            searchResults.innerHTML = `<div style="padding: 20px; color: var(--text-secondary);">Suche nach "${escapeHtml(query)}"...</div>`;
-            
-            setTimeout(() => {
-                searchResults.innerHTML += `<div class="status-option" style="margin-top: 8px;">📍 Beispiel Ergebnis<br><small style="color: var(--text-secondary)">2.3 km entfernt</small></div>`;
-            }, 500);
-        }
-
-        function toggleStatus() { 
-            const statusOverlay = document.getElementById('statusOverlay');
-            if (statusOverlay) statusOverlay.classList.toggle('active'); 
-            if (fabOpen) toggleFab(); 
-        }
-        
-        function closeStatus() { 
-            const statusOverlay = document.getElementById('statusOverlay');
-            if (statusOverlay) statusOverlay.classList.remove('active'); 
-        }
-        
-        function updateStatus(emoji, text, isMusic) {
-            closeStatus();
-            if (isMusic && currentTrackIndex !== -1 && queue[currentTrackIndex]) {
-                sendSystemMessage(`${emoji} ${text}: ${queue[currentTrackIndex].title}`);
+            // Lade YouTube IFrame API
+            if (!window.YT) {
+                const tag = document.createElement('script');
+                tag.src = "https://www.youtube.com/iframe_api";
+                document.body.appendChild(tag);
+                window.onYouTubeIframeAPIReady = () => createPlayer(videoId);
             } else {
-                sendSystemMessage(`${emoji} ${text}`);
+                createPlayer(videoId);
+            }
+            
+            document.getElementById('playerTitle').textContent = title;
+            document.getElementById('playerArtist').textContent = artist;
+            document.getElementById('playerArt').src = thumb;
+            document.getElementById('miniPlayer').classList.add('active');
+            document.getElementById('playPauseBtn').textContent = '⏸';
+            isPlaying = true;
+            
+            toggleSearch();
+            toggleFab();
+        }
+
+        function createPlayer(videoId) {
+            player = new YT.Player('ytPlayer', {
+                height: '1',
+                width: '1',
+                videoId: videoId,
+                playerVars: {autoplay: 1, controls: 0},
+                events: {
+                    onStateChange: onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                document.getElementById('playPauseBtn').textContent = '▶';
+                isPlaying = false;
             }
         }
 
-        function toggleQuiz() { 
-            const quizOverlay = document.getElementById('quizOverlay');
-            if (quizOverlay) quizOverlay.classList.toggle('active'); 
-            if (fabOpen) toggleFab(); 
+        function playerToggle() {
+            if (!player) return;
+            if (isPlaying) {
+                player.pauseVideo();
+                document.getElementById('playPauseBtn').textContent = '▶';
+            } else {
+                player.playVideo();
+                document.getElementById('playPauseBtn').textContent = '⏸';
+            }
+            isPlaying = !isPlaying;
         }
 
-        function showToast(msg) {
+        function playerNext() {
+            showToast("Nächster Track (Demo)");
+        }
+
+        function playerPrev() {
+            showToast("Vorheriger Track (Demo)");
+        }
+
+        // ===================== UI UTILS =====================
+        function toggleFab() {
+            const menu = document.getElementById('fabMenu');
+            const btn = document.getElementById('fabMain');
+            menu.classList.toggle('active');
+            btn.classList.toggle('active');
+        }
+
+        function showToast(text) {
             const toast = document.getElementById('toast');
-            if (!toast) return;
-            
-            toast.textContent = msg;
+            toast.textContent = text;
             toast.classList.add('show');
-            
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Timer
-        function updateTimerDisplay() {
-            const timerMinutes = document.getElementById('timerMinutes');
-            const timerSeconds = document.getElementById('timerSeconds');
-            const timerDisplay = document.getElementById('timerDisplay');
+        // ===================== SERVICE WORKER (PWA) =====================
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => {
+                    e.waitUntil(
+                        caches.open('nabe-v1').then(cache => 
+                            cache.addAll([
+                                'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css',
+                                'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js'
+                            ])
+                        )
+                    );
+                    self.skipWaiting();
+                });
+                self.addEventListener('activate', e => {
+                    e.waitUntil(self.clients.claim());
+                });
+                self.addEventListener('fetch', e => {
+                    e.respondWith(
+                        caches.match(e.request).then(response => {
+                            if (response) return response;
+                            return fetch(e.request).catch(() => {
+                                if (e.request.destination === 'image') {
+                                    return new Response();
+                                }
+                            });
+                        })
+                    );
+                });
+            `;
             
-            if (!timerMinutes || !timerSeconds || !timerDisplay) return;
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            const swUrl = URL.createObjectURL(blob);
             
-            const m = (parseInt(timerMinutes.value) || 0).toString().padStart(2, '0');
-            const s = (parseInt(timerSeconds.value) || 0).toString().padStart(2, '0');
-            timerDisplay.textContent = `${m}:${s}`;
-        }
-        
-        function startTimer() {
-            const timerMinutes = document.getElementById('timerMinutes');
-            const timerSeconds = document.getElementById('timerSeconds');
-            
-            if (!timerMinutes || !timerSeconds) return;
-            
-            const mins = parseInt(timerMinutes.value) || 0;
-            const secs = parseInt(timerSeconds.value) || 0;
-            timerSeconds = mins * 60 + secs;
-            
-            if (timerSeconds <= 0) return;
-            
-            if (window.timerInterval) clearInterval(window.timerInterval);
-            
-            window.timerInterval = setInterval(() => {
-                timerSeconds--;
-                const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
-                const s = (timerSeconds % 60).toString().padStart(2, '0');
-                
-                const timerDisplay = document.getElementById('timerDisplay');
-                if (timerDisplay) timerDisplay.textContent = `${m}:${s}`;
-                
-                if (timerSeconds <= 0) {
-                    clearInterval(window.timerInterval);
-                    window.timerInterval = null;
-                    showToast('⏱ Zeit abgelaufen');
-                    
-                    if (navigator.vibrate && typeof navigator.vibrate === 'function') {
-                        try {
-                            navigator.vibrate([200, 100, 200]);
-                        } catch(e) {}
-                    }
-                }
-            }, 1000);
-        }
-        
-        function resetTimer() {
-            if (window.timerInterval) {
-                clearInterval(window.timerInterval);
-                window.timerInterval = null;
-            }
-            timerSeconds = 0;
-            updateTimerDisplay();
+            navigator.serviceWorker.register(swUrl).then(() => {
+                console.log('Service Worker registriert');
+            }).catch(err => {
+                console.log('SW Registrierung fehlgeschlagen:', err);
+            });
         }
 
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-            stopVisualizer();
-            stopProgressUpdate();
-            if (window.timerInterval) clearInterval(window.timerInterval);
+        // ===================== KEYBOARD HANDLING =====================
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.overlay-panel').forEach(el => el.classList.remove('active'));
+                document.getElementById('fabMenu').classList.remove('active');
+                document.getElementById('fabMain').classList.remove('active');
+            }
         });
 
-        // Events
-        document.addEventListener('DOMContentLoaded', () => {
-            const chatInput = document.getElementById('chatInput');
-            const musicInput = document.getElementById('musicInput');
-            
-            if (chatInput) {
-                chatInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') sendChatMessage();
-                });
-            }
-            
-            if (musicInput) {
-                musicInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') addToQueue(e.target.value);
-                });
-            }
-            
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    document.querySelectorAll('.overlay-panel.active').forEach(el => {
-                        if (el) el.classList.remove('active');
-                    });
-                    document.querySelectorAll('.side-panel.open').forEach(el => {
-                        if (el) el.classList.remove('open');
-                    });
-                    const musicFabBtn = document.getElementById('musicFabBtn');
-                    if (musicFabBtn) musicFabBtn.classList.remove('active');
-                }
-            });
-            
-            document.addEventListener('click', (e) => {
-                if (fabOpen && !e.target.closest('#fabContainer')) {
-                    toggleFab();
-                }
-            });
-            
-            // Init queue UI
-            updateQueueUI();
-            
-            // Prüfen ob Leaflet geladen ist
-            if (typeof L === 'undefined') {
-                console.error('Leaflet nicht geladen beim DOMContentLoaded');
+        // Click outside to close FAB
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#fabContainer') && document.getElementById('fabMenu').classList.contains('active')) {
+                toggleFab();
             }
         });
     </script>
