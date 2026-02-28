@@ -36,6 +36,7 @@
             overflow: hidden;
             width: 100%;
             height: 100%;
+            position: fixed;
         }
 
         /* Location Gate */
@@ -52,7 +53,7 @@
         }
         #locationGate.hidden { opacity: 0; pointer-events: none; }
         
-        .gate-content { text-align: center; padding: 20px; }
+        .gate-content { text-align: center; padding: 20px; max-width: 90%; }
         .gate-logo { 
             font-size: 48px; 
             font-weight: 300; 
@@ -83,10 +84,21 @@
             font-weight: 600;
             border-radius: 24px;
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            margin: 8px;
         }
         .gate-btn:hover { 
             transform: translateY(-2px);
             box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+        .gate-btn.secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: none;
+        }
+        .gate-btn.secondary:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
         }
         .gate-error { 
             color: var(--danger); 
@@ -94,10 +106,13 @@
             font-size: 14px; 
             display: none; 
             font-family: 'Courier New', monospace;
+            max-width: 300px;
+            text-align: center;
+            line-height: 1.5;
         }
 
         /* Main App */
-        #mainApp { width: 100%; height: 100%; opacity: 0; transition: opacity 0.5s; display: none; }
+        #mainApp { width: 100%; height: 100%; opacity: 0; transition: opacity 0.5s; display: none; position: relative; }
         #mainApp.active { opacity: 1; display: block; }
         
         #map { 
@@ -105,6 +120,9 @@
             height: 100%; 
             z-index: 1; 
             background: #0a0a0a;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         /* Matrix Theme für Karte */
@@ -126,7 +144,7 @@
             pointer-events: none;
         }
 
-        /* Position Indicator - Style wie im Screenshot */
+        /* Position Indicator */
         #posIndicator {
             position: fixed; 
             top: 80px; 
@@ -134,6 +152,7 @@
             z-index: 100;
             background: rgba(0, 0, 0, 0.8); 
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 8px 16px;
             border-radius: 20px;
@@ -157,10 +176,11 @@
             background: #10b981;
             border-radius: 50%;
             box-shadow: 0 0 8px #10b981;
+            animation: pulse 2s infinite;
         }
         .pos-text { color: var(--text-primary); }
 
-        /* Cyan FAB Button wie im Screenshot */
+        /* Cyan FAB Button */
         #fabContainer { 
             position: fixed; 
             bottom: 30px; 
@@ -212,6 +232,7 @@
         .fab-label {
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 6px 12px; 
             border-radius: 6px; 
             font-size: 12px;
@@ -230,6 +251,7 @@
             border-radius: 50%; 
             background: rgba(30, 30, 30, 0.9);
             backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: var(--text-primary); 
             cursor: pointer; 
@@ -269,6 +291,7 @@
             height: 100%;
             background: var(--bg-secondary);
             backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             border-left: 1px solid rgba(255, 255, 255, 0.05);
             z-index: 900; 
             transition: right 0.3s;
@@ -284,6 +307,7 @@
             justify-content: space-between; 
             align-items: center;
             background: rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
         }
         .panel-title { 
             font-size: 16px; 
@@ -321,6 +345,7 @@
             right: 20px;
             background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-left: 3px solid var(--music-accent);
             border-radius: 12px;
@@ -388,6 +413,7 @@
             text-align: center;
             background: linear-gradient(180deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
         }
 
         .album-art {
@@ -401,7 +427,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.1);
         }
-        .album-art img { width: 100%; height: 100%; object-fit: cover; }
+        .album-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
         
         .vinyl-overlay {
             position: absolute;
@@ -447,7 +473,7 @@
             height: 4px;
         }
 
-        .progress-container { padding: 0 20px 16px; }
+        .progress-container { padding: 0 20px 16px; flex-shrink: 0; }
         .progress-bar {
             width: 100%;
             height: 3px;
@@ -481,6 +507,7 @@
             gap: 24px;
             padding: 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
         }
         .control-btn {
             background: none;
@@ -506,7 +533,7 @@
         .control-btn.play:hover { transform: scale(1.05); background: var(--accent-cyan); }
 
         /* Queue */
-        .queue-container { flex: 1; overflow-y: auto; padding: 16px; }
+        .queue-container { flex: 1; overflow-y: auto; padding: 16px; min-height: 0; }
         .queue-header {
             display: flex;
             justify-content: space-between;
@@ -517,6 +544,7 @@
             color: var(--text-secondary);
             letter-spacing: 1px;
             font-family: 'Courier New', monospace;
+            flex-shrink: 0;
         }
         .queue-list { display: flex; flex-direction: column; gap: 8px; }
         
@@ -542,15 +570,16 @@
             color: var(--text-secondary); 
             font-size: 11px;
             font-family: 'Courier New', monospace;
+            flex-shrink: 0;
         }
-        .queue-thumb { width: 36px; height: 36px; border-radius: 4px; background: #333; object-fit: cover; }
-        .queue-info { flex: 1; min-width: 0; text-align: left; }
+        .queue-thumb { width: 36px; height: 36px; border-radius: 4px; background: #333; object-fit: cover; flex-shrink: 0; }
+        .queue-info { flex: 1; min-width: 0; text-align: left; overflow: hidden; }
         .queue-title { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
-        .queue-artist { font-size: 11px; color: var(--text-secondary); }
+        .queue-artist { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .queue-remove {
             background: none; border: none; color: var(--text-secondary);
             cursor: pointer; padding: 8px; opacity: 0; transition: opacity 0.2s;
-            font-size: 12px;
+            font-size: 16px; flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
         }
         .queue-item:hover .queue-remove { opacity: 1; }
         .queue-remove:hover { color: var(--danger); }
@@ -559,12 +588,14 @@
         #chatMessages {
             flex: 1; overflow-y: auto; padding: 16px;
             display: flex; flex-direction: column; gap: 10px;
+            min-height: 0;
         }
         .message {
             max-width: 80%; padding: 10px 14px; border-radius: 12px;
             position: relative; animation: slideIn 0.3s;
             font-size: 14px;
             line-height: 1.4;
+            word-break: break-word;
         }
         .message.own { 
             align-self: flex-end; 
@@ -596,6 +627,7 @@
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             display: flex; gap: 8px;
             background: rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
         }
 
         .input-wrapper { position: relative; flex: 1; display: flex; align-items: center; }
@@ -625,6 +657,11 @@
             border-radius: 50%;
             font-size: 14px;
             transition: all 0.2s;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .voice-btn:hover { background: rgba(0, 212, 255, 0.1); }
         .voice-btn.recording { animation: pulse 1s infinite; color: var(--danger); }
@@ -642,6 +679,7 @@
             justify-content: center;
             font-size: 16px;
             transition: transform 0.2s;
+            flex-shrink: 0;
         }
         .send-btn:hover { transform: scale(1.1); }
 
@@ -654,6 +692,7 @@
             height: 100%;
             background: rgba(0,0,0,0.9); 
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             z-index: 2000; 
             display: none; 
             justify-content: center; 
@@ -734,7 +773,9 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             font-size: 13px;
+            transition: all 0.2s;
         }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
         .btn-secondary { 
             background: transparent; 
             color: var(--text-secondary); 
@@ -743,6 +784,7 @@
             border-radius: 24px; 
             cursor: pointer;
             font-size: 13px;
+            transition: all 0.2s;
         }
         .btn-secondary:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
 
@@ -759,6 +801,7 @@
             align-items: center; 
             gap: 12px;
             font-size: 14px;
+            color: var(--text-primary);
         }
         .status-option:hover { 
             border-color: var(--accent-cyan); 
@@ -773,6 +816,7 @@
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.9); 
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 16px 32px; 
             border-radius: 30px; 
             border: 1px solid var(--accent-cyan);
@@ -805,6 +849,7 @@
             transform: translateX(-50%) translateY(100px);
             background: rgba(0, 0, 0, 0.9); 
             backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid var(--accent-cyan);
             color: var(--accent-cyan); 
             padding: 12px 24px; 
@@ -815,10 +860,12 @@
             pointer-events: none;
             font-size: 13px;
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+            text-align: center;
+            max-width: 90%;
         }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        /* User Marker - Blauer Ring wie im Screenshot */
+        /* User Marker */
         .user-marker-pin {
             width: 20px;
             height: 20px;
@@ -834,7 +881,7 @@
             100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0), 0 0 20px rgba(0, 212, 255, 0.6); }
         }
 
-        /* Kompass Button (wie im Screenshot unten links) */
+        /* Compass Button */
         .compass-btn {
             position: fixed;
             bottom: 30px;
@@ -885,16 +932,24 @@
         @media (max-width: 768px) {
             .gate-logo { font-size: 36px; letter-spacing: 6px; }
             .side-panel { max-width: 100%; }
-            #miniPlayer { width: calc(100% - 100px); left: 20px; right: auto; bottom: 100px; }
+            #miniPlayer { width: calc(100% - 40px); left: 20px; right: 20px; bottom: 100px; }
             .album-art { width: 140px; height: 140px; }
             .timer-display { font-size: 42px; }
             #fabContainer { bottom: 20px; right: 20px; }
             .compass-btn { bottom: 20px; left: 20px; }
+            .timer-inputs { gap: 8px; }
+            .time-field input { width: 60px; font-size: 20px; }
         }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: var(--accent-cyan); border-radius: 3px; }
+        
+        /* Disabled State */
+        .disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -904,6 +959,7 @@
             <div class="gate-logo">NABE</div>
             <div class="gate-subtitle">Location-Based Intelligence</div>
             <button class="gate-btn" onclick="requestLocation()">Standort aktivieren</button>
+            <button class="gate-btn secondary" onclick="skipLocation()">Ohne Standort fortfahren</button>
             <div id="gateError" class="gate-error"></div>
         </div>
     </div>
@@ -915,7 +971,7 @@
         <!-- Position Indicator -->
         <div id="posIndicator">
             <div class="pos-dot"></div>
-            <span class="pos-text" id="posText">53.1928, 8.5004</span>
+            <span class="pos-text" id="posText">--.----, --.----</span>
         </div>
 
         <!-- Compass Button -->
@@ -1131,42 +1187,102 @@
     </div>
 
     <script>
+        // Safe LocalStorage
+        const safeStorage = {
+            get: (key, defaultVal) => {
+                try {
+                    const item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : defaultVal;
+                } catch (e) {
+                    return defaultVal;
+                }
+            },
+            set: (key, val) => {
+                try {
+                    localStorage.setItem(key, JSON.stringify(val));
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+        };
+
         // Firebase Setup
-        const firebaseConfig = { apiKey: "YOUR_API_KEY", authDomain: "demo.firebaseapp.com", databaseURL: "https://demo.firebaseio.com", projectId: "demo", storageBucket: "demo.appspot.com", messagingSenderId: "123456789", appId: "1:123456789:web:abcdef" };
+        const firebaseConfig = { 
+            apiKey: "YOUR_API_KEY", 
+            authDomain: "demo.firebaseapp.com", 
+            databaseURL: "https://demo.firebaseio.com", 
+            projectId: "demo", 
+            storageBucket: "demo.appspot.com", 
+            messagingSenderId: "123456789", 
+            appId: "1:123456789:web:abcdef" 
+        };
+        
         let db = null, isFirebaseReady = false;
         try {
-            if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+            if (firebaseConfig.apiKey !== "YOUR_API_KEY" && typeof firebase !== 'undefined') {
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.database();
                 isFirebaseReady = true;
             }
-        } catch (e) {}
+        } catch (e) {
+            console.warn('Firebase nicht verfügbar:', e);
+        }
 
         // Global State
-        let map, userMarker, userPosition, fabOpen = false;
-        let timerInterval, timerSeconds = 0;
-        let recognition, currentVoiceTarget;
+        let map = null, userMarker = null, userPosition = null, fabOpen = false;
+        let timerInterval = null, timerSeconds = 0;
+        let recognition = null, currentVoiceTarget = null;
         let userId = 'user_' + Math.random().toString(36).substr(2, 9);
+        let isLocationActive = false;
 
         // Music State
-        let player = null, queue = JSON.parse(localStorage.getItem('nabe_queue') || '[]');
+        let player = null, queue = [];
         let currentTrackIndex = -1, isPlaying = false, isShuffle = false, playerReady = false;
-        let visualizerInterval;
+        let visualizerInterval = null;
+        let progressAnimationId = null;
+
+        // Initialize queue from storage
+        try {
+            queue = safeStorage.get('nabe_queue', []);
+        } catch (e) {
+            queue = [];
+        }
 
         // YouTube API
         function onYouTubeIframeAPIReady() {
-            player = new YT.Player('youtubePlayer', {
-                width: '1', height: '1',
-                playerVars: { playsinline: 1, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, rel: 0, showinfo: 0 },
-                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
-            });
+            try {
+                player = new YT.Player('youtubePlayer', {
+                    width: '1', 
+                    height: '1',
+                    playerVars: { 
+                        playsinline: 1, 
+                        controls: 0, 
+                        disablekb: 1, 
+                        fs: 0, 
+                        modestbranding: 1, 
+                        rel: 0, 
+                        showinfo: 0 
+                    },
+                    events: { 
+                        'onReady': onPlayerReady, 
+                        'onStateChange': onPlayerStateChange,
+                        'onError': onPlayerError
+                    }
+                });
+            } catch (e) {
+                console.error('YouTube Player Init Fehler:', e);
+                showToast('Musik-Player konnte nicht geladen werden');
+            }
         }
 
         function onPlayerReady() {
             playerReady = true;
             generateVisualizerBars();
             updateQueueUI();
-            if (queue.length > 0) loadTrack(0, false);
+            if (queue.length > 0) {
+                loadTrack(0, false);
+            }
         }
 
         function onPlayerStateChange(event) {
@@ -1175,21 +1291,32 @@
                 updatePlayButton();
                 startProgressUpdate();
                 startVisualizer();
-                document.getElementById('nowPlaying').classList.add('playing');
-                document.getElementById('miniPlayer').classList.add('playing');
+                const nowPlaying = document.getElementById('nowPlaying');
+                const miniPlayer = document.getElementById('miniPlayer');
+                if (nowPlaying) nowPlaying.classList.add('playing');
+                if (miniPlayer) miniPlayer.classList.add('playing');
             } else if (event.data == YT.PlayerState.PAUSED) {
                 isPlaying = false;
                 updatePlayButton();
                 stopVisualizer();
-                document.getElementById('nowPlaying').classList.remove('playing');
-                document.getElementById('miniPlayer').classList.remove('playing');
+                const nowPlaying = document.getElementById('nowPlaying');
+                const miniPlayer = document.getElementById('miniPlayer');
+                if (nowPlaying) nowPlaying.classList.remove('playing');
+                if (miniPlayer) miniPlayer.classList.remove('playing');
             } else if (event.data == YT.PlayerState.ENDED) {
                 nextTrack();
             }
         }
 
+        function onPlayerError(event) {
+            console.error('YouTube Player Error:', event.data);
+            showToast('Fehler beim Abspielen. Überspringe...');
+            setTimeout(nextTrack, 2000);
+        }
+
         function generateVisualizerBars() {
             const container = document.getElementById('visualizer');
+            if (!container) return;
             container.innerHTML = '';
             for (let i = 0; i < 16; i++) {
                 const bar = document.createElement('div');
@@ -1199,7 +1326,9 @@
         }
 
         function startVisualizer() {
+            stopVisualizer();
             const bars = document.querySelectorAll('.viz-bar');
+            if (bars.length === 0) return;
             visualizerInterval = setInterval(() => {
                 bars.forEach(bar => {
                     bar.style.height = (Math.random() * 40 + 4) + 'px';
@@ -1208,20 +1337,30 @@
         }
 
         function stopVisualizer() {
-            clearInterval(visualizerInterval);
-            document.querySelectorAll('.viz-bar').forEach(bar => bar.style.height = '4px');
+            if (visualizerInterval) {
+                clearInterval(visualizerInterval);
+                visualizerInterval = null;
+            }
+            document.querySelectorAll('.viz-bar').forEach(bar => {
+                bar.style.height = '4px';
+            });
         }
 
         // Music Functions
         function extractVideoId(url) {
+            if (!url || typeof url !== 'string') return null;
+            url = url.trim();
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             const match = url.match(regExp);
             return (match && match[2].length === 11) ? match[2] : (url.length === 11 ? url : null);
         }
 
         function addToQueue(input) {
-            const videoId = extractVideoId(input.trim());
-            if (!videoId) { showToast('Ungültiger Link'); return; }
+            const videoId = extractVideoId(input);
+            if (!videoId) { 
+                showToast('Ungültiger YouTube Link'); 
+                return; 
+            }
             
             const track = {
                 id: videoId,
@@ -1231,45 +1370,70 @@
             };
             
             queue.push(track);
-            saveQueue();
+            safeStorage.set('nabe_queue', queue);
             updateQueueUI();
             
-            if (queue.length === 1) loadTrack(0, false);
-            showToast('Hinzugefügt');
-            document.getElementById('musicInput').value = '';
+            if (queue.length === 1 && playerReady) {
+                loadTrack(0, false);
+            }
+            showToast('Zur Warteschlange hinzugefügt');
+            
+            const musicInput = document.getElementById('musicInput');
+            if (musicInput) musicInput.value = '';
         }
 
         function loadTrack(index, autoplay) {
-            if (!playerReady || index < 0 || index >= queue.length) return;
+            if (!playerReady || !player || !player.loadVideoById) return;
+            if (index < 0 || index >= queue.length) return;
             
             currentTrackIndex = index;
             const track = queue[index];
             
-            player.loadVideoById(track.id);
-            if (!autoplay) player.pauseVideo();
-            
-            document.getElementById('albumArt').src = track.thumbnail;
-            document.getElementById('trackTitle').textContent = track.title;
-            document.getElementById('trackArtist').textContent = track.artist;
-            
-            updateQueueUI();
-            updateMiniPlayer();
+            try {
+                player.loadVideoById(track.id);
+                if (!autoplay) player.pauseVideo();
+                
+                const albumArt = document.getElementById('albumArt');
+                const trackTitle = document.getElementById('trackTitle');
+                const trackArtist = document.getElementById('trackArtist');
+                
+                if (albumArt) albumArt.src = track.thumbnail;
+                if (trackTitle) trackTitle.textContent = track.title;
+                if (trackArtist) trackArtist.textContent = track.artist;
+                
+                updateQueueUI();
+                updateMiniPlayer();
+            } catch (e) {
+                console.error('Fehler beim Laden des Tracks:', e);
+                showToast('Fehler beim Laden');
+            }
         }
 
         function togglePlay() {
-            if (!playerReady) return;
-            if (currentTrackIndex === -1 && queue.length > 0) {
-                loadTrack(0, true);
-            } else if (isPlaying) {
-                player.pauseVideo();
-            } else {
-                player.playVideo();
+            if (!playerReady || !player) return;
+            
+            try {
+                if (currentTrackIndex === -1 && queue.length > 0) {
+                    loadTrack(0, true);
+                } else if (isPlaying) {
+                    player.pauseVideo();
+                } else {
+                    player.playVideo();
+                }
+            } catch (e) {
+                console.error('Playback Fehler:', e);
             }
         }
 
         function nextTrack() {
             if (queue.length === 0) return;
-            let nextIndex = isShuffle ? Math.floor(Math.random() * queue.length) : (currentTrackIndex + 1 >= queue.length ? 0 : currentTrackIndex + 1);
+            let nextIndex;
+            if (isShuffle) {
+                nextIndex = Math.floor(Math.random() * queue.length);
+            } else {
+                nextIndex = currentTrackIndex + 1;
+                if (nextIndex >= queue.length) nextIndex = 0;
+            }
             loadTrack(nextIndex, true);
         }
 
@@ -1282,40 +1446,54 @@
 
         function toggleShuffle() {
             isShuffle = !isShuffle;
-            document.getElementById('shuffleBtn').style.color = isShuffle ? 'var(--accent-cyan)' : 'var(--text-secondary)';
+            const shuffleBtn = document.getElementById('shuffleBtn');
+            if (shuffleBtn) {
+                shuffleBtn.style.color = isShuffle ? 'var(--accent-cyan)' : 'var(--text-secondary)';
+            }
             showToast(isShuffle ? 'Shuffle: An' : 'Shuffle: Aus');
         }
 
         function removeFromQueue(index) {
+            if (index < 0 || index >= queue.length) return;
+            
             queue.splice(index, 1);
             if (currentTrackIndex === index) {
-                player.stopVideo();
+                if (player && player.stopVideo) {
+                    try { player.stopVideo(); } catch(e) {}
+                }
                 currentTrackIndex = -1;
                 if (queue.length > 0) loadTrack(0, false);
             } else if (currentTrackIndex > index) {
                 currentTrackIndex--;
             }
-            saveQueue();
+            
+            safeStorage.set('nabe_queue', queue);
             updateQueueUI();
         }
 
         function clearQueue() {
             queue = [];
             currentTrackIndex = -1;
-            if (playerReady) player.stopVideo();
-            saveQueue();
+            if (player && player.stopVideo) {
+                try { player.stopVideo(); } catch(e) {}
+            }
+            safeStorage.set('nabe_queue', queue);
             updateQueueUI();
-            document.getElementById('trackTitle').textContent = 'Kein Titel';
-            document.getElementById('trackArtist').textContent = 'Warteschlange ist leer';
+            
+            const trackTitle = document.getElementById('trackTitle');
+            const trackArtist = document.getElementById('trackArtist');
+            if (trackTitle) trackTitle.textContent = 'Kein Titel';
+            if (trackArtist) trackArtist.textContent = 'Warteschlange ist leer';
             updateMiniPlayer();
         }
-
-        function saveQueue() { localStorage.setItem('nabe_queue', JSON.stringify(queue)); }
 
         function updateQueueUI() {
             const list = document.getElementById('queueList');
             const count = document.getElementById('queueCount');
-            count.textContent = queue.length;
+            
+            if (count) count.textContent = queue.length;
+            
+            if (!list) return;
             
             if (queue.length === 0) {
                 list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 40px 20px; font-size: 14px;">Füge Songs zur Warteschlange hinzu</div>';
@@ -1335,38 +1513,71 @@
             `).join('');
         }
 
-        function playTrack(index) { loadTrack(index, true); }
-        function updatePlayButton() { document.getElementById('playBtn').textContent = isPlaying ? '❚❚' : '▶'; }
+        function playTrack(index) { 
+            loadTrack(index, true); 
+        }
+        
+        function updatePlayButton() { 
+            const btn = document.getElementById('playBtn');
+            if (btn) btn.textContent = isPlaying ? '❚❚' : '▶'; 
+        }
+        
         function updateMiniPlayer() {
             const mini = document.getElementById('miniPlayer');
+            if (!mini) return;
+            
             if (currentTrackIndex === -1 || queue.length === 0) {
                 mini.classList.remove('active');
                 return;
             }
+            
             const track = queue[currentTrackIndex];
-            document.querySelector('.mini-title').textContent = track.title;
-            document.querySelector('.mini-artist').textContent = track.artist;
+            const titleEl = document.querySelector('.mini-title');
+            const artistEl = document.querySelector('.mini-artist');
+            
+            if (titleEl) titleEl.textContent = track.title;
+            if (artistEl) artistEl.textContent = track.artist;
             mini.classList.add('active');
         }
 
         function startProgressUpdate() {
+            stopProgressUpdate();
+            
             const update = () => {
                 if (!isPlaying || !player || !player.getCurrentTime) return;
+                
                 try {
                     const current = player.getCurrentTime();
                     const duration = player.getDuration();
+                    
                     if (duration > 0) {
-                        document.getElementById('progressFill').style.width = (current / duration) * 100 + '%';
-                        document.getElementById('currentTime').textContent = formatTime(current);
-                        document.getElementById('totalTime').textContent = formatTime(duration);
+                        const progressFill = document.getElementById('progressFill');
+                        const currentTime = document.getElementById('currentTime');
+                        const totalTime = document.getElementById('totalTime');
+                        
+                        if (progressFill) progressFill.style.width = (current / duration) * 100 + '%';
+                        if (currentTime) currentTime.textContent = formatTime(current);
+                        if (totalTime) totalTime.textContent = formatTime(duration);
                     }
-                    requestAnimationFrame(update);
-                } catch(e) {}
+                    
+                    progressAnimationId = requestAnimationFrame(update);
+                } catch(e) {
+                    stopProgressUpdate();
+                }
             };
-            requestAnimationFrame(update);
+            
+            progressAnimationId = requestAnimationFrame(update);
+        }
+
+        function stopProgressUpdate() {
+            if (progressAnimationId) {
+                cancelAnimationFrame(progressAnimationId);
+                progressAnimationId = null;
+            }
         }
 
         function formatTime(seconds) {
+            if (isNaN(seconds) || seconds < 0) return '0:00';
             const m = Math.floor(seconds / 60);
             const s = Math.floor(seconds % 60);
             return `${m}:${s.toString().padStart(2, '0')}`;
@@ -1374,135 +1585,255 @@
 
         function seekTo(event) {
             if (!player || !player.getDuration) return;
-            const rect = event.currentTarget.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const percent = x / rect.width;
-            player.seekTo(player.getDuration() * percent, true);
+            
+            try {
+                const rect = event.currentTarget.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const percent = x / rect.width;
+                player.seekTo(player.getDuration() * percent, true);
+            } catch (e) {
+                console.error('Seek Fehler:', e);
+            }
         }
 
         function shareCurrentTrack() {
-            if (currentTrackIndex === -1) return;
+            if (currentTrackIndex === -1 || !queue[currentTrackIndex]) return;
+            
             const track = queue[currentTrackIndex];
             const url = `https://youtube.com/watch?v=${track.id}`;
-            navigator.clipboard?.writeText(url);
-            showToast('Link kopiert');
-            sendSystemMessage(`♫ Hört: ${track.title}`);
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast('Link kopiert');
+                    sendSystemMessage(`♫ Hört: ${track.title}`);
+                }).catch(() => {
+                    showToast('Kopieren fehlgeschlagen');
+                });
+            } else {
+                // Fallback
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('Link kopiert');
+            }
         }
 
         // Map Functions
         function initMap(pos) {
-            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([pos.lat, pos.lng], 16);
+            const mapContainer = document.getElementById('map');
+            if (!mapContainer) return;
             
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                subdomains: 'abcd'
-            }).addTo(map);
+            try {
+                map = L.map('map', { 
+                    zoomControl: false, 
+                    attributionControl: false 
+                }).setView([pos.lat, pos.lng], 16);
+                
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 19,
+                    subdomains: 'abcd'
+                }).addTo(map);
 
-            // User Marker mit blauem Ring wie im Screenshot
-            const icon = L.divIcon({
-                className: 'custom-marker',
-                iconSize: [16, 16],
-                iconAnchor: [8, 8]
-            });
-            
-            userMarker = L.marker([pos.lat, pos.lng], { icon: icon, zIndexOffset: 1000 }).addTo(map);
-            
-            // Accuracy Circle (blau)
-            L.circle([pos.lat, pos.lng], {
-                radius: pos.accuracy || 100,
-                color: '#00d4ff',
-                fillColor: '#00d4ff',
-                fillOpacity: 0.1,
-                weight: 1
-            }).addTo(map);
+                // User Marker
+                const icon = L.divIcon({
+                    className: 'custom-marker',
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                });
+                
+                userMarker = L.marker([pos.lat, pos.lng], { 
+                    icon: icon, 
+                    zIndexOffset: 1000 
+                }).addTo(map);
+                
+                // Accuracy Circle
+                if (pos.accuracy) {
+                    L.circle([pos.lat, pos.lng], {
+                        radius: pos.accuracy,
+                        color: '#00d4ff',
+                        fillColor: '#00d4ff',
+                        fillOpacity: 0.1,
+                        weight: 1
+                    }).addTo(map);
+                }
 
-            // Andere User (Demo)
-            addDemoMarkers(pos);
+                // Demo Markers
+                addDemoMarkers(pos);
+                
+                // Start watching position
+                if (isLocationActive && navigator.geolocation) {
+                    navigator.geolocation.watchPosition(
+                        (position) => {
+                            if (userMarker && position.coords) {
+                                userMarker.setLatLng([position.coords.latitude, position.coords.longitude]);
+                                userPosition = { 
+                                    lat: position.coords.latitude, 
+                                    lng: position.coords.longitude 
+                                };
+                                updateLocationDisplay();
+                            }
+                        },
+                        (error) => console.warn('Position Watch Error:', error),
+                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+                    );
+                }
+            } catch (e) {
+                console.error('Map Init Fehler:', e);
+                showToast('Karte konnte nicht geladen werden');
+            }
         }
 
         function addDemoMarkers(userPos) {
-            // Simulierte andere User in der Nähe
+            if (!map || !userPos) return;
+            
             const offsets = [
                 [0.002, 0.001], [-0.001, 0.002], [0.001, -0.001], [-0.002, -0.002]
             ];
-            offsets.forEach((offset, i) => {
-                L.marker([userPos.lat + offset[0], userPos.lng + offset[1]], {
-                    icon: L.divIcon({
-                        className: 'custom-marker',
-                        iconSize: [12, 12],
-                        iconAnchor: [6, 6]
-                    })
-                }).addTo(map);
+            
+            offsets.forEach((offset) => {
+                try {
+                    L.marker([userPos.lat + offset[0], userPos.lng + offset[1]], {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            iconSize: [12, 12],
+                            iconAnchor: [6, 6]
+                        })
+                    }).addTo(map);
+                } catch (e) {
+                    console.warn('Demo Marker Fehler:', e);
+                }
             });
         }
 
         function requestLocation() {
+            const gateError = document.getElementById('gateError');
+            
             if (!navigator.geolocation) {
-                document.getElementById('gateError').textContent = 'Geolocation nicht unterstützt';
-                document.getElementById('gateError').style.display = 'block';
+                if (gateError) {
+                    gateError.textContent = 'Geolocation wird von diesem Browser nicht unterstützt';
+                    gateError.style.display = 'block';
+                }
                 return;
             }
             
             navigator.geolocation.getCurrentPosition(
                 (position) => {
+                    if (!position.coords) {
+                        if (gateError) {
+                            gateError.textContent = 'Standortdaten nicht verfügbar';
+                            gateError.style.display = 'block';
+                        }
+                        return;
+                    }
+                    
                     userPosition = { 
                         lat: position.coords.latitude, 
                         lng: position.coords.longitude,
                         accuracy: position.coords.accuracy 
                     };
                     
-                    document.getElementById('locationGate').classList.add('hidden');
-                    document.getElementById('mainApp').classList.add('active');
-                    
-                    setTimeout(() => {
-                        document.getElementById('fabContainer').classList.add('visible');
-                        document.getElementById('compassBtn').classList.add('visible');
-                        document.getElementById('posIndicator').classList.add('visible');
-                    }, 500);
-                    
+                    isLocationActive = true;
+                    enterApp();
                     initMap(userPosition);
                     updateLocationDisplay();
-                    
-                    // Watch position
-                    navigator.geolocation.watchPosition((pos) => {
-                        if (userMarker) {
-                            userMarker.setLatLng([pos.coords.latitude, pos.coords.longitude]);
-                            userPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                            updateLocationDisplay();
-                        }
-                    });
                 },
                 (error) => {
-                    document.getElementById('gateError').textContent = 'Standort erforderlich';
-                    document.getElementById('gateError').style.display = 'block';
+                    let errorMsg = 'Standort konnte nicht ermittelt werden';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = 'Standort-Zugriff verweigert. Bitte in den Browsereinstellungen erlauben.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = 'Standortdaten nicht verfügbar';
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = 'Zeitüberschreitung bei der Standortermittlung';
+                            break;
+                    }
+                    if (gateError) {
+                        gateError.textContent = errorMsg;
+                        gateError.style.display = 'block';
+                    }
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
             );
         }
 
+        function skipLocation() {
+            isLocationActive = false;
+            userPosition = { lat: 52.5200, lng: 13.4050 }; // Berlin als Default
+            enterApp();
+            initMap(userPosition);
+            updateLocationDisplay();
+            showToast('Demo-Modus: Berlin');
+        }
+
+        function enterApp() {
+            const gate = document.getElementById('locationGate');
+            const mainApp = document.getElementById('mainApp');
+            
+            if (gate) gate.classList.add('hidden');
+            if (mainApp) mainApp.classList.add('active');
+            
+            setTimeout(() => {
+                const fabContainer = document.getElementById('fabContainer');
+                const compassBtn = document.getElementById('compassBtn');
+                const posIndicator = document.getElementById('posIndicator');
+                
+                if (fabContainer) fabContainer.classList.add('visible');
+                if (compassBtn) compassBtn.classList.add('visible');
+                if (posIndicator) posIndicator.classList.add('visible');
+            }, 500);
+        }
+
         function updateLocationDisplay() {
-            if (userPosition) {
-                document.getElementById('posText').textContent = `${userPosition.lat.toFixed(4)}, ${userPosition.lng.toFixed(4)}`;
+            const posText = document.getElementById('posText');
+            if (posText && userPosition) {
+                posText.textContent = `${userPosition.lat.toFixed(4)}, ${userPosition.lng.toFixed(4)}`;
             }
         }
 
         function recenterMap() {
             if (map && userPosition) {
-                map.panTo([userPosition.lat, userPosition.lng]);
+                try {
+                    map.panTo([userPosition.lat, userPosition.lng]);
+                } catch (e) {
+                    console.error('Recenter Fehler:', e);
+                }
             }
         }
 
         // Chat Functions
         function sendChatMessage() {
             const input = document.getElementById('chatInput');
+            if (!input) return;
+            
             const text = input.value.trim();
             if (!text) return;
-            input.value = '';
             
+            input.value = '';
             addChatMessage(text, 'own', userId, Date.now());
+            
+            // Echo für Demo
             setTimeout(() => {
-                addChatMessage(text, 'other', 'echo', Date.now());
+                addChatMessage(text, 'other', 'echo_' + Math.random().toString(36).substr(2, 5), Date.now());
             }, 1000);
+            
+            // Firebase Integration (falls verfügbar)
+            if (isFirebaseReady && db) {
+                try {
+                    db.ref('messages').push({
+                        text: text,
+                        user: userId,
+                        timestamp: Date.now()
+                    });
+                } catch (e) {
+                    console.warn('Firebase Send Fehler:', e);
+                }
+            }
         }
 
         function sendSystemMessage(text) {
@@ -1511,104 +1842,205 @@
 
         function addChatMessage(text, type, user, timestamp) {
             const messages = document.getElementById('chatMessages');
+            if (!messages) return;
+            
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${type}`;
             
             if (type === 'system') {
                 msgDiv.innerHTML = text;
             } else {
-                const time = new Date(timestamp).toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
-                msgDiv.innerHTML = `<div>${text}</div><div class="message-meta">${time}</div>`;
+                const time = new Date(timestamp).toLocaleTimeString('de-DE', {
+                    hour: '2-digit', 
+                    minute:'2-digit'
+                });
+                msgDiv.innerHTML = `<div>${escapeHtml(text)}</div><div class="message-meta">${time}</div>`;
             }
             
             messages.appendChild(msgDiv);
             messages.scrollTop = messages.scrollHeight;
         }
 
-        // Speech
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Speech Recognition
         function initSpeechRecognition() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return null;
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const rec = new SpeechRecognition();
-            rec.lang = 'de-DE';
-            rec.continuous = false;
-            rec.interimResults = false;
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                return null;
+            }
             
-            rec.onstart = () => {
-                document.getElementById('speechVisualizer').classList.add('active');
-                document.querySelectorAll('.voice-btn').forEach(btn => btn.classList.add('recording'));
-            };
-            rec.onend = () => {
-                document.getElementById('speechVisualizer').classList.remove('active');
-                document.querySelectorAll('.voice-btn').forEach(btn => btn.classList.remove('recording'));
-            };
-            rec.onresult = (event) => {
-                const text = event.results[0][0].transcript;
-                if (currentVoiceTarget === 'chat') { document.getElementById('chatInput').value = text; sendChatMessage(); }
-                else if (currentVoiceTarget === 'music') { document.getElementById('musicInput').value = text; addToQueue(text); }
-                else if (currentVoiceTarget === 'search') { document.getElementById('searchInput').value = text; performSearch(text); }
-            };
-            return rec;
+            try {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const rec = new SpeechRecognition();
+                rec.lang = 'de-DE';
+                rec.continuous = false;
+                rec.interimResults = false;
+                
+                rec.onstart = () => {
+                    const visualizer = document.getElementById('speechVisualizer');
+                    if (visualizer) visualizer.classList.add('active');
+                    document.querySelectorAll('.voice-btn').forEach(btn => {
+                        if (btn) btn.classList.add('recording');
+                    });
+                };
+                
+                rec.onend = () => {
+                    const visualizer = document.getElementById('speechVisualizer');
+                    if (visualizer) visualizer.classList.remove('active');
+                    document.querySelectorAll('.voice-btn').forEach(btn => {
+                        if (btn) btn.classList.remove('recording');
+                    });
+                };
+                
+                rec.onresult = (event) => {
+                    if (!event.results || !event.results[0]) return;
+                    const text = event.results[0][0].transcript;
+                    
+                    if (currentVoiceTarget === 'chat') {
+                        const chatInput = document.getElementById('chatInput');
+                        if (chatInput) chatInput.value = text;
+                        sendChatMessage();
+                    } else if (currentVoiceTarget === 'music') {
+                        const musicInput = document.getElementById('musicInput');
+                        if (musicInput) {
+                            musicInput.value = text;
+                            addToQueue(text);
+                        }
+                    } else if (currentVoiceTarget === 'search') {
+                        const searchInput = document.getElementById('searchInput');
+                        if (searchInput) {
+                            searchInput.value = text;
+                            performSearch(text);
+                        }
+                    }
+                };
+                
+                rec.onerror = (event) => {
+                    console.warn('Speech Recognition Error:', event.error);
+                    showToast('Spracherkennung fehlgeschlagen');
+                };
+                
+                return rec;
+            } catch (e) {
+                console.warn('Speech Init Fehler:', e);
+                return null;
+            }
         }
 
         function startVoiceInput(target) {
+            if (!recognition) {
+                recognition = initSpeechRecognition();
+            }
+            if (!recognition) {
+                showToast('Spracherkennung nicht verfügbar');
+                return;
+            }
+            
             currentVoiceTarget = target;
-            if (!recognition) recognition = initSpeechRecognition();
-            if (!recognition) { showToast('Sprache nicht verfügbar'); return; }
-            try { recognition.start(); } catch(e) { recognition.stop(); setTimeout(() => recognition.start(), 100); }
+            try {
+                recognition.start();
+            } catch(e) {
+                try {
+                    recognition.stop();
+                    setTimeout(() => recognition.start(), 100);
+                } catch(e2) {
+                    showToast('Fehler beim Starten der Spracherkennung');
+                }
+            }
         }
 
         // UI Toggles
         function toggleFab() {
             fabOpen = !fabOpen;
-            document.getElementById('fabMain').classList.toggle('active');
-            document.getElementById('fabMenu').classList.toggle('active');
+            const fabMain = document.getElementById('fabMain');
+            const fabMenu = document.getElementById('fabMenu');
+            
+            if (fabMain) fabMain.classList.toggle('active');
+            if (fabMenu) fabMenu.classList.toggle('active');
         }
 
         function toggleChat() {
-            document.getElementById('chatPanel').classList.toggle('open');
-            document.getElementById('musicPanel').classList.remove('open');
-            document.getElementById('musicFabBtn').classList.remove('active');
-            if (document.getElementById('chatPanel').classList.contains('open')) {
-                document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+            const chatPanel = document.getElementById('chatPanel');
+            const musicPanel = document.getElementById('musicPanel');
+            const musicFabBtn = document.getElementById('musicFabBtn');
+            
+            if (chatPanel) chatPanel.classList.toggle('open');
+            if (musicPanel) musicPanel.classList.remove('open');
+            if (musicFabBtn) musicFabBtn.classList.remove('active');
+            
+            if (chatPanel && chatPanel.classList.contains('open')) {
+                const chatMessages = document.getElementById('chatMessages');
+                if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
             }
         }
 
         function toggleMusic() {
-            document.getElementById('musicPanel').classList.toggle('open');
-            document.getElementById('chatPanel').classList.remove('open');
-            document.getElementById('musicFabBtn').classList.toggle('active');
+            const musicPanel = document.getElementById('musicPanel');
+            const chatPanel = document.getElementById('chatPanel');
+            const musicFabBtn = document.getElementById('musicFabBtn');
+            
+            if (musicPanel) musicPanel.classList.toggle('open');
+            if (chatPanel) chatPanel.classList.remove('open');
+            if (musicFabBtn) musicFabBtn.classList.toggle('active');
         }
 
         function toggleTimer() { 
-            document.getElementById('timerOverlay').classList.toggle('active'); 
+            const timerOverlay = document.getElementById('timerOverlay');
+            if (timerOverlay) timerOverlay.classList.toggle('active'); 
             if (fabOpen) toggleFab(); 
             updateTimerDisplay(); 
         }
-        function closeTimer() { document.getElementById('timerOverlay').classList.remove('active'); }
+        
+        function closeTimer() { 
+            const timerOverlay = document.getElementById('timerOverlay');
+            if (timerOverlay) timerOverlay.classList.remove('active'); 
+        }
         
         function toggleSearch() { 
-            document.getElementById('searchOverlay').classList.toggle('active'); 
+            const searchOverlay = document.getElementById('searchOverlay');
+            if (searchOverlay) searchOverlay.classList.toggle('active'); 
             if (fabOpen) toggleFab(); 
         }
-        function closeSearch() { document.getElementById('searchOverlay').classList.remove('active'); }
+        
+        function closeSearch() { 
+            const searchOverlay = document.getElementById('searchOverlay');
+            if (searchOverlay) searchOverlay.classList.remove('active'); 
+        }
         
         function performSearch(query) {
-            document.getElementById('searchResults').innerHTML = `<div style="padding: 20px; color: var(--text-secondary);">Suche nach "${query}"...</div>`;
+            const searchResults = document.getElementById('searchResults');
+            if (!searchResults) return;
+            
+            if (!query || query.trim() === '') {
+                searchResults.innerHTML = '<div style="padding: 20px; color: var(--text-secondary);">Bitte Suchbegriff eingeben</div>';
+                return;
+            }
+            
+            searchResults.innerHTML = `<div style="padding: 20px; color: var(--text-secondary);">Suche nach "${escapeHtml(query)}"...</div>`;
+            
             setTimeout(() => {
-                document.getElementById('searchResults').innerHTML += `<div class="status-option" style="margin-top: 8px;">📍 Ergebnis 1<br><small style="color: var(--text-secondary)">2.3 km entfernt</small></div>`;
+                searchResults.innerHTML += `<div class="status-option" style="margin-top: 8px;">📍 Beispiel Ergebnis<br><small style="color: var(--text-secondary)">2.3 km entfernt</small></div>`;
             }, 500);
         }
 
         function toggleStatus() { 
-            document.getElementById('statusOverlay').classList.toggle('active'); 
+            const statusOverlay = document.getElementById('statusOverlay');
+            if (statusOverlay) statusOverlay.classList.toggle('active'); 
             if (fabOpen) toggleFab(); 
         }
-        function closeStatus() { document.getElementById('statusOverlay').classList.remove('active'); }
+        
+        function closeStatus() { 
+            const statusOverlay = document.getElementById('statusOverlay');
+            if (statusOverlay) statusOverlay.classList.remove('active'); 
+        }
         
         function updateStatus(emoji, text, isMusic) {
             closeStatus();
-            if (isMusic && currentTrackIndex !== -1) {
+            if (isMusic && currentTrackIndex !== -1 && queue[currentTrackIndex]) {
                 sendSystemMessage(`${emoji} ${text}: ${queue[currentTrackIndex].title}`);
             } else {
                 sendSystemMessage(`${emoji} ${text}`);
@@ -1616,67 +2048,124 @@
         }
 
         function toggleQuiz() { 
-            document.getElementById('quizOverlay').classList.toggle('active'); 
+            const quizOverlay = document.getElementById('quizOverlay');
+            if (quizOverlay) quizOverlay.classList.toggle('active'); 
             if (fabOpen) toggleFab(); 
         }
 
         function showToast(msg) {
             const toast = document.getElementById('toast');
+            if (!toast) return;
+            
             toast.textContent = msg;
             toast.classList.add('show');
+            
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
         // Timer
         function updateTimerDisplay() {
-            const m = (parseInt(document.getElementById('timerMinutes').value) || 0).toString().padStart(2, '0');
-            const s = (parseInt(document.getElementById('timerSeconds').value) || 0).toString().padStart(2, '0');
-            document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+            const timerMinutes = document.getElementById('timerMinutes');
+            const timerSeconds = document.getElementById('timerSeconds');
+            const timerDisplay = document.getElementById('timerDisplay');
+            
+            if (!timerMinutes || !timerSeconds || !timerDisplay) return;
+            
+            const m = (parseInt(timerMinutes.value) || 0).toString().padStart(2, '0');
+            const s = (parseInt(timerSeconds.value) || 0).toString().padStart(2, '0');
+            timerDisplay.textContent = `${m}:${s}`;
         }
         
         function startTimer() {
-            const mins = parseInt(document.getElementById('timerMinutes').value) || 0;
-            const secs = parseInt(document.getElementById('timerSeconds').value) || 0;
-            timerSeconds = mins * 60 + secs;
-            if (timerSeconds <= 0) return;
-            if (timerInterval) clearInterval(timerInterval);
+            const timerMinutes = document.getElementById('timerMinutes');
+            const timerSeconds = document.getElementById('timerSeconds');
             
-            timerInterval = setInterval(() => {
+            if (!timerMinutes || !timerSeconds) return;
+            
+            const mins = parseInt(timerMinutes.value) || 0;
+            const secs = parseInt(timerSeconds.value) || 0;
+            timerSeconds = mins * 60 + secs;
+            
+            if (timerSeconds <= 0) return;
+            
+            if (window.timerInterval) clearInterval(window.timerInterval);
+            
+            window.timerInterval = setInterval(() => {
                 timerSeconds--;
                 const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
                 const s = (timerSeconds % 60).toString().padStart(2, '0');
-                document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+                
+                const timerDisplay = document.getElementById('timerDisplay');
+                if (timerDisplay) timerDisplay.textContent = `${m}:${s}`;
                 
                 if (timerSeconds <= 0) {
-                    clearInterval(timerInterval);
+                    clearInterval(window.timerInterval);
+                    window.timerInterval = null;
                     showToast('⏱ Zeit abgelaufen');
-                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    
+                    if (navigator.vibrate && typeof navigator.vibrate === 'function') {
+                        try {
+                            navigator.vibrate([200, 100, 200]);
+                        } catch(e) {}
+                    }
                 }
             }, 1000);
         }
         
         function resetTimer() {
-            clearInterval(timerInterval);
+            if (window.timerInterval) {
+                clearInterval(window.timerInterval);
+                window.timerInterval = null;
+            }
             timerSeconds = 0;
             updateTimerDisplay();
         }
 
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            stopVisualizer();
+            stopProgressUpdate();
+            if (window.timerInterval) clearInterval(window.timerInterval);
+        });
+
         // Events
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('chatInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatMessage(); });
-            document.getElementById('musicInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') addToQueue(e.target.value); });
+            const chatInput = document.getElementById('chatInput');
+            const musicInput = document.getElementById('musicInput');
+            
+            if (chatInput) {
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') sendChatMessage();
+                });
+            }
+            
+            if (musicInput) {
+                musicInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') addToQueue(e.target.value);
+                });
+            }
             
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
-                    document.querySelectorAll('.overlay-panel.active').forEach(el => el.classList.remove('active'));
-                    document.querySelectorAll('.side-panel.open').forEach(el => el.classList.remove('open'));
-                    document.getElementById('musicFabBtn').classList.remove('active');
+                    document.querySelectorAll('.overlay-panel.active').forEach(el => {
+                        if (el) el.classList.remove('active');
+                    });
+                    document.querySelectorAll('.side-panel.open').forEach(el => {
+                        if (el) el.classList.remove('open');
+                    });
+                    const musicFabBtn = document.getElementById('musicFabBtn');
+                    if (musicFabBtn) musicFabBtn.classList.remove('active');
                 }
             });
             
             document.addEventListener('click', (e) => {
-                if (fabOpen && !e.target.closest('#fabContainer')) toggleFab();
+                if (fabOpen && !e.target.closest('#fabContainer')) {
+                    toggleFab();
+                }
             });
+            
+            // Init queue UI
+            updateQueueUI();
         });
     </script>
 </body>
