@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>NABE | Location-Based Intelligence</title>
     
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDummyKeyForGitHubPages&libraries=geometry" async defer onerror="mapError()"></script>
+    <!-- Leaflet CSS (Open Source, no API key needed) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     
     <style>
@@ -40,21 +42,26 @@
         .loc-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 30px rgba(0, 212, 255, 0.4); }
         .loc-btn.secondary { background: transparent; border: 1px solid var(--cyan-dim); color: var(--cyan); }
         .loc-btn.secondary:hover { background: var(--cyan); color: var(--bg); }
-        .loc-error { color: var(--accent); font-size: 13px; margin-top: 20px; display: none; }
+        .loc-error { color: var(--accent); font-size: 13px; margin-top: 20px; display: none; max-width: 400px; }
 
         /* Main App (initially hidden) */
-        #mainApp { opacity: 0; pointer-events: none; transition: opacity 0.5s; height: 100%; }
+        #mainApp { opacity: 0; pointer-events: none; transition: opacity 0.5s; height: 100%; position: relative; }
         #mainApp.active { opacity: 1; pointer-events: auto; }
 
         /* Map & Ambient */
-        #map { position: absolute; inset: 0; filter: grayscale(100%) invert(100%) contrast(110%) brightness(0.03); z-index: 0; }
+        #map { position: absolute; inset: 0; z-index: 0; background: #020202; }
         .ambient-grid { position: fixed; inset: 0; background-image: linear-gradient(var(--cyan-dim) 1px, transparent 1px), linear-gradient(90deg, var(--cyan-dim) 1px, transparent 1px); background-size: 50px 50px; opacity: 0.1; pointer-events: none; z-index: 1; }
 
-        /* User Location Marker */
-        .user-marker { position: relative; width: 20px; height: 20px; background: var(--cyan); border-radius: 50%; box-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan); z-index: 10; }
-        .user-marker::after { content: ''; position: absolute; inset: -10px; border: 2px solid var(--cyan); border-radius: 50%; animation: radar 2s infinite; }
+        /* Leaflet Dark Mode Overrides */
+        .leaflet-layer { filter: grayscale(100%) invert(100%) contrast(110%) brightness(0.15) !important; }
+        .leaflet-container { background: #020202 !important; }
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--text); border: 1px solid var(--cyan-dim); border-radius: 12px; }
+        .leaflet-popup-content { margin: 12px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+
+        /* User Location Marker Custom Style */
+        .user-marker-pin { width: 20px; height: 20px; background: var(--cyan); border-radius: 50%; box-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan); position: relative; }
+        .user-marker-pin::after { content: ''; position: absolute; inset: -10px; border: 2px solid var(--cyan); border-radius: 50%; animation: radar 2s infinite; }
         @keyframes radar { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
-        .accuracy-circle { fill: rgba(0, 212, 255, 0.1); stroke: rgba(0, 212, 255, 0.3); stroke-width: 1; }
 
         /* FAB Menu - Only visible with location */
         .fab-container { position: fixed; bottom: 40px; right: 40px; z-index: 100; opacity: 0; transform: translateY(20px); transition: all 0.5s 0.3s; }
@@ -177,7 +184,7 @@
             .quiz-container { padding: 0; }
             .option-btn { padding: 15px 20px; font-size: 14px; }
             .quiz-header { flex-direction: column; gap: 15px; align-items: flex-start; }
-            .pos-indicator { top: 10px; left: 10px; padding: 8px 12px; font-size: 11px; }
+            .pos-indicator { top: 10px; left: 10px; padding: 8px 12px; font-size: 11px; max-width: calc(100% - 20px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         }
     </style>
 </head>
@@ -365,7 +372,6 @@
         }
 
         function closeApp() {
-            // Try to close window (works only if opened by script) or redirect
             if (window.history.length > 1) {
                 window.history.back();
             } else {
@@ -376,54 +382,45 @@
 
         function initMap(pos) {
             try {
-                if (typeof google === 'undefined' || !google.maps) {
-                    mapError();
-                    return;
-                }
-                
-                map = new google.maps.Map(document.getElementById('map'), {
-                    center: { lat: pos.lat, lng: pos.lng },
-                    zoom: 16,
-                    disableDefaultUI: true,
-                    gestureHandling: "greedy",
-                    styles: [
-                        { elementType: "geometry", stylers: [{ color: "#020202" }] }, 
-                        { elementType: "labels.text.fill", stylers: [{ color: "#00d4ff" }] },
-                        { featureType: "road", elementType: "geometry", stylers: [{ visibility: "simplified" }, { color: "#0a0a0a" }] }
-                    ]
+                // Initialize Leaflet Map (OpenStreetMap - Free, no API key needed)
+                map = L.map('map', {
+                    zoomControl: false,
+                    attributionControl: false
+                }).setView([pos.lat, pos.lng], 16);
+
+                // Add dark-themed tile layer (CartoDB Dark Matter - free)
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 19,
+                    subdomains: 'abcd'
+                }).addTo(map);
+
+                // Add user marker with custom icon
+                const userIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: "<div class='user-marker-pin'></div>",
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
                 });
 
-                // Add user marker
-                addUserMarker(pos);
+                userMarker = L.marker([pos.lat, pos.lng], { icon: userIcon }).addTo(map);
                 
                 // Add accuracy circle
-                accuracyCircle = new google.maps.Circle({
-                    map: map,
-                    center: { lat: pos.lat, lng: pos.lng },
+                accuracyCircle = L.circle([pos.lat, pos.lng], {
                     radius: pos.accuracy || 50,
                     fillColor: '#00d4ff',
                     fillOpacity: 0.1,
-                    strokeColor: '#00d4ff',
-                    strokeOpacity: 0.3,
-                    strokeWeight: 1
-                });
+                    color: '#00d4ff',
+                    opacity: 0.3,
+                    weight: 1
+                }).addTo(map);
+
+                // Add popup
+                userMarker.bindPopup("Du bist hier<br>Genauigkeit: ±" + Math.round(pos.accuracy || 0) + "m").openPopup();
                 
             } catch(e) {
                 console.error('Map init error:', e);
-                mapError();
+                showToast('Karte konnte nicht geladen werden');
             }
-        }
-
-        function addUserMarker(pos) {
-            const div = document.createElement('div');
-            div.className = 'user-marker';
-            
-            userMarker = new google.maps.marker.AdvancedMarkerElement({
-                map: map,
-                position: { lat: pos.lat, lng: pos.lng },
-                content: div,
-                title: 'Dein Standort'
-            });
         }
 
         function updatePosition(position) {
@@ -436,13 +433,11 @@
             userPosition = newPos;
             
             if (map && userMarker) {
-                userMarker.position = { lat: newPos.lat, lng: newPos.lng };
+                userMarker.setLatLng([newPos.lat, newPos.lng]);
                 if (accuracyCircle) {
-                    accuracyCircle.setCenter({ lat: newPos.lat, lng: newPos.lng });
+                    accuracyCircle.setLatLng([newPos.lat, newPos.lng]);
                     accuracyCircle.setRadius(newPos.accuracy || 50);
                 }
-                // Optionally center map on user (uncomment if desired)
-                // map.panTo({ lat: newPos.lat, lng: newPos.lng });
             }
             
             updateLocationDisplay();
@@ -457,11 +452,7 @@
             }
         }
 
-        function mapError() {
-            showToast('Karte konnte nicht geladen werden');
-        }
-
-        // Rest of the app logic (Quiz etc.) remains the same but only accessible after location grant
+        // Rest of the app logic
         window.onload = () => {
             const today = new Date();
             document.getElementById('currentDate').textContent = today.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -896,7 +887,6 @@
                     </div>
                 </div>
             `;
-            // Re-set date after restart
             document.getElementById('currentDate').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
             if(userPosition) {
                 document.getElementById('locationName').textContent = `${userPosition.lat.toFixed(4)} N, ${userPosition.lng.toFixed(4)} E`;
